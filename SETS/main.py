@@ -29,6 +29,14 @@ def launch_browser():
         chrome_options = Options()
         chrome_options.add_argument('--start-maximized')
         chrome_options.add_argument('--disable-blink-features=AutomationControlled')
+
+        # CACHE-BUSTING: Disable all caching
+        chrome_options.add_argument('--disable-cache')
+        chrome_options.add_argument('--disable-application-cache')
+        chrome_options.add_argument('--disable-offline-load-stale-cache')
+        chrome_options.add_argument('--disk-cache-size=0')
+        chrome_options.add_argument('--incognito')  # Use incognito mode for fresh session
+
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         chrome_options.add_experimental_option('useAutomationExtension', False)
 

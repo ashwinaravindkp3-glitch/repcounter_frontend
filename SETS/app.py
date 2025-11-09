@@ -11,6 +11,22 @@ import pathlib
 app = Flask(__name__)
 app.secret_key = 'fitness_tracker_secret'
 
+# Disable all caching (force fresh load every time)
+@app.after_request
+def add_header(response):
+    """Add headers to prevent caching"""
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '-1'
+    return response
+
+# Inject cache version into all templates
+@app.context_processor
+def inject_cache_version():
+    """Make cache version available to all templates"""
+    from config import CACHE_VERSION
+    return dict(v=CACHE_VERSION)
+
 # Global components (initialized in main.py)
 serial_handler = None
 rfid_auth = None
