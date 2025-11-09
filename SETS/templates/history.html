@@ -3,43 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SETS - Mission Archive</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/clean.css') }}?v={{ v }}">
+    <title>SETS - History</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/oled.css') }}?v={{ v }}">
     <style>
-        body {
-            background: var(--bg-darker);
-            min-height: 100vh;
-        }
-
         .history-container {
-            min-height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
             padding: 2rem;
-            position: relative;
-            z-index: 10;
         }
 
-        /* Cyberpunk Navbar */
-        .cyber-navbar {
-            background: rgba(26, 31, 58, 0.9);
-            border: 1px solid var(--neon-cyan);
-            border-radius: 10px;
-            padding: 1.5rem 2rem;
-            margin-bottom: 3rem;
+        /* Navbar */
+        .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
-            animation: slideUp 0.6s ease-out;
+            padding: 1.5rem 2rem;
+            border: 2px solid var(--oled-cyan);
+            margin-bottom: 2rem;
+            background: var(--oled-surface);
         }
 
         .navbar-brand {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 900;
-            color: var(--neon-cyan);
-            text-shadow: var(--glow-cyan);
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--oled-cyan);
             letter-spacing: 4px;
+            text-shadow: var(--oled-glow);
         }
 
         .navbar-links {
@@ -49,425 +38,196 @@
         }
 
         .navbar-links a {
-            font-family: 'Rajdhani', sans-serif;
+            color: var(--oled-white);
             text-decoration: none;
-            color: var(--text-light);
-            font-weight: 600;
-            letter-spacing: 1px;
             text-transform: uppercase;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .navbar-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--neon-cyan);
-            box-shadow: var(--glow-cyan);
-            transition: width 0.3s ease;
-        }
-
-        .navbar-links a:hover::after {
-            width: 100%;
+            letter-spacing: 1px;
+            font-weight: 600;
+            transition: all 0.2s;
         }
 
         .navbar-links a:hover {
-            color: var(--neon-cyan);
-            text-shadow: var(--glow-cyan);
+            color: var(--oled-cyan);
+            text-shadow: var(--oled-glow);
         }
 
+        /* Page Header */
         .page-header {
             text-align: center;
             margin: 3rem 0;
-            animation: slideUp 0.8s ease-out;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--oled-border);
         }
 
         .page-header h1 {
-            font-family: 'Orbitron', sans-serif;
             font-size: 3.5rem;
-            font-weight: 900;
-            color: var(--neon-cyan);
-            text-shadow: var(--glow-cyan);
-            margin-bottom: 1rem;
+            font-weight: 700;
+            color: var(--oled-cyan);
+            text-shadow: 0 0 25px var(--oled-cyan);
+            margin-bottom: 0.5rem;
             letter-spacing: 6px;
-            text-transform: uppercase;
         }
 
         .page-header p {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.3rem;
-            color: var(--neon-magenta);
-            text-shadow: 0 0 10px var(--neon-magenta);
+            font-size: 1.2rem;
+            color: var(--oled-gray);
             letter-spacing: 2px;
             text-transform: uppercase;
         }
 
-        .history-table-container {
-            background: linear-gradient(135deg, rgba(26, 31, 58, 0.95), rgba(10, 14, 39, 0.95));
-            border: 2px solid rgba(0, 240, 255, 0.5);
-            border-radius: 20px;
+        /* History Table */
+        .table-container {
+            background: var(--oled-surface);
+            border: 2px solid var(--oled-cyan);
             padding: 2rem;
-            box-shadow:
-                0 0 60px rgba(0, 240, 255, 0.3),
-                inset 0 0 40px rgba(0, 240, 255, 0.05);
-            animation: slideUp 1s ease-out;
             position: relative;
-            overflow: hidden;
         }
 
-        .history-table-container::before {
+        .table-container::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
-            animation: scanProgress 2s ease-in-out infinite;
-        }
-
-        @keyframes scanProgress {
-            0%, 100% { transform: translateX(-100%); }
-            50% { transform: translateX(100%); }
+            inset: 0;
+            border: 1px solid var(--oled-cyan);
+            margin: 5px;
+            pointer-events: none;
         }
 
         .history-table {
             width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            position: relative;
-            z-index: 1;
+            border-collapse: collapse;
         }
 
         .history-table thead {
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.3), rgba(255, 0, 255, 0.3));
-            border-bottom: 2px solid var(--neon-cyan);
+            border-bottom: 2px solid var(--oled-cyan);
         }
 
         .history-table th {
-            font-family: 'Rajdhani', sans-serif;
-            padding: 1.2rem;
+            padding: 1rem;
             text-align: left;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 1rem;
-            color: var(--neon-cyan);
-            text-shadow: 0 0 10px var(--neon-cyan);
-        }
-
-        .history-table th:first-child {
-            border-top-left-radius: 12px;
-        }
-
-        .history-table th:last-child {
-            border-top-right-radius: 12px;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+            color: var(--oled-cyan);
+            background: var(--oled-bg);
         }
 
         .history-table tbody tr {
-            transition: all 0.3s ease;
-            animation: slideInLeft 0.6s ease-out;
-            animation-fill-mode: both;
-            border-bottom: 1px solid rgba(0, 240, 255, 0.1);
-        }
-
-        .history-table tbody tr:nth-child(1) { animation-delay: 0.1s; }
-        .history-table tbody tr:nth-child(2) { animation-delay: 0.2s; }
-        .history-table tbody tr:nth-child(3) { animation-delay: 0.3s; }
-        .history-table tbody tr:nth-child(4) { animation-delay: 0.4s; }
-        .history-table tbody tr:nth-child(5) { animation-delay: 0.5s; }
-
-        @keyframes slideInLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+            border-bottom: 1px solid var(--oled-border);
+            transition: all 0.2s;
         }
 
         .history-table tbody tr:hover {
-            background: linear-gradient(90deg, rgba(0, 240, 255, 0.1), rgba(255, 0, 255, 0.1));
-            transform: translateX(5px);
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+            background: var(--oled-bg);
         }
 
         .history-table td {
-            font-family: 'Rajdhani', sans-serif;
-            padding: 1.2rem;
-            color: var(--text-light);
-            font-size: 1.1rem;
+            padding: 1rem;
+            color: var(--oled-white);
         }
 
-        .history-table tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .exercise-badge {
-            display: inline-block;
-            padding: 0.5rem 1.2rem;
-            background: transparent;
-            border: 2px solid var(--neon-cyan);
-            color: var(--neon-cyan);
-            border-radius: 10px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
-        }
-
-        .stat-badge {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            background: rgba(0, 240, 255, 0.1);
-            border: 1px solid var(--neon-cyan);
-            color: var(--neon-cyan);
-            border-radius: 8px;
-            font-weight: 700;
-            font-family: 'Share Tech Mono', monospace;
-            letter-spacing: 1px;
-        }
-
-        .accuracy-badge {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-weight: 700;
-            font-family: 'Share Tech Mono', monospace;
-            letter-spacing: 1px;
-            border: 2px solid;
-        }
-
-        .accuracy-high {
-            background: rgba(0, 255, 65, 0.2);
-            border-color: var(--neon-green);
-            color: var(--neon-green);
-            text-shadow: 0 0 10px var(--neon-green);
-        }
-
-        .accuracy-medium {
-            background: rgba(255, 255, 0, 0.2);
-            border-color: var(--neon-yellow);
-            color: var(--neon-yellow);
-            text-shadow: 0 0 10px var(--neon-yellow);
-        }
-
-        .accuracy-low {
-            background: rgba(255, 0, 85, 0.2);
-            border-color: var(--danger);
-            color: var(--danger);
-            text-shadow: 0 0 10px var(--danger);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 5rem 2rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .empty-state-icon {
-            font-size: 8rem;
-            margin-bottom: 1.5rem;
-            filter: drop-shadow(0 0 30px var(--neon-cyan));
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        .empty-state h3 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2rem;
-            color: var(--neon-cyan);
-            text-shadow: var(--glow-cyan);
-            margin-bottom: 1rem;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-        }
-
-        .empty-state p {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.3rem;
-            color: var(--text-light);
-            letter-spacing: 2px;
-            margin-bottom: 2rem;
+        .exercise-cell {
+            font-weight: 600;
+            color: var(--oled-cyan);
         }
 
         .date-cell {
-            color: var(--neon-magenta);
-            font-weight: 700;
-            text-shadow: 0 0 10px var(--neon-magenta);
+            color: var(--oled-gray);
+            font-family: 'Courier New', monospace;
         }
 
-        .date-time {
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 0.9rem;
-            font-family: 'Share Tech Mono', monospace;
+        .stat-cell {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
         }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
+        .no-data {
+            text-align: center;
+            padding: 3rem;
+            color: var(--oled-gray);
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
+
+            .page-header h1 {
+                font-size: 2.5rem;
+            }
+
+            .history-table {
+                font-size: 0.85rem;
+            }
+
+            .history-table th,
+            .history-table td {
+                padding: 0.75rem 0.5rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Cyberpunk Grid Background -->
-    <div class="cyber-grid"></div>
-    <div class="scan-lines"></div>
-
-    <!-- Animated Particles -->
-    <div class="particles" id="particles"></div>
-
-    <!-- Custom Cursor -->
-    <div class="custom-cursor" id="customCursor"></div>
-
     <div class="history-container">
-        <!-- Cyberpunk Navbar -->
-        <div class="cyber-navbar">
+        <!-- Navbar -->
+        <div class="navbar">
             <div class="navbar-brand">SETS</div>
             <div class="navbar-links">
-                <a href="/dashboard">MISSION CONTROL</a>
-                <a href="/history">DATA LOGS</a>
-                <button class="cyber-btn cyber-btn-magenta" onclick="window.location.href='/api/logout'" style="padding: 0.5rem 1.5rem;">
-                    LOGOUT
-                </button>
+                <a href="/dashboard">DASHBOARD</a>
+                <a href="/history">HISTORY</a>
+                <button onclick="window.location.href='/api/logout'">LOGOUT</button>
             </div>
         </div>
 
         <!-- Page Header -->
         <div class="page-header">
-            <h1>📊 DATA LOGS</h1>
-            <p>▶ Mission Archive for Operator: {{ username | upper }}</p>
+            <h1>WORKOUT HISTORY</h1>
+            <p>▸ TRAINING LOG</p>
         </div>
 
         <!-- History Table -->
-        <div class="history-table-container">
-            {% if history %}
+        <div class="table-container">
+            {% if history and history|length > 0 %}
             <table class="history-table">
                 <thead>
                     <tr>
-                        <th>▶ Timestamp</th>
-                        <th>▶ Exercise</th>
-                        <th>▶ Reps × Sets</th>
-                        <th>▶ Duration</th>
-                        <th>▶ Accuracy</th>
+                        <th>DATE</th>
+                        <th>EXERCISE</th>
+                        <th>SETS</th>
+                        <th>REPS</th>
+                        <th>DURATION</th>
+                        <th>CALORIES</th>
+                        <th>ACCURACY</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for row in history %}
+                    {% for workout in history %}
                     <tr>
-                        <td>
-                            <span class="date-cell">{{ row.timestamp[:10] }}</span><br>
-                            <span class="date-time">{{ row.timestamp[11:16] }}</span>
-                        </td>
-                        <td>
-                            <span class="exercise-badge">{{ row.exercise }}</span>
-                        </td>
-                        <td>
-                            <span class="stat-badge">{{ row.reps }} × {{ row.sets }}</span>
-                            <span class="date-time" style="margin-left: 0.5rem;">
-                                = {{ row.reps|int * row.sets|int }} total
-                            </span>
-                        </td>
-                        <td style="color: var(--neon-cyan); font-family: 'Share Tech Mono', monospace;">
-                            ⏱️ {{ row.duration_min }} min
-                        </td>
-                        <td>
-                            {% set total_reps = row.reps|int * row.sets|int %}
-                            {% set accuracy = (row.valid_reps|int / total_reps * 100) if total_reps > 0 else 0 %}
-                            <span class="accuracy-badge
-                                {% if accuracy >= 80 %}accuracy-high
-                                {% elif accuracy >= 60 %}accuracy-medium
-                                {% else %}accuracy-low{% endif %}">
-                                {{ row.valid_reps }} / {{ total_reps }} ({{ "%.0f"|format(accuracy) }}%)
-                            </span>
+                        <td class="date-cell">{{ workout.date }}</td>
+                        <td class="exercise-cell">{{ workout.exercise | upper }}</td>
+                        <td class="stat-cell">{{ workout.sets }}</td>
+                        <td class="stat-cell">{{ workout.reps }}</td>
+                        <td class="stat-cell">{{ workout.duration }}s</td>
+                        <td class="stat-cell">{{ workout.calories }}</td>
+                        <td class="stat-cell">
+                            {% set accuracy = (workout.valid_reps / (workout.reps * workout.sets) * 100) if (workout.reps * workout.sets) > 0 else 100 %}
+                            {{ "%.1f"|format(accuracy) }}%
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
             {% else %}
-            <div class="empty-state">
-                <div class="empty-state-icon">📡</div>
-                <h3>NO MISSIONS LOGGED</h3>
-                <p>Begin your training protocol to start tracking progress</p>
-                <a href="/dashboard" class="cyber-btn" style="margin-top: 2rem; padding: 1rem 2.5rem; display: inline-block;">
-                    ▶ INITIALIZE FIRST MISSION
-                </a>
+            <div class="no-data">
+                NO WORKOUT DATA FOUND
             </div>
             {% endif %}
         </div>
     </div>
-
-    <script>
-        // Custom Cursor
-        const cursor = document.getElementById('customCursor');
-        let mouseX = 0, mouseY = 0;
-        let cursorX = 0, cursorY = 0;
-
-        document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-        });
-
-        function animateCursor() {
-            cursorX += (mouseX - cursorX) * 0.2;
-            cursorY += (mouseY - cursorY) * 0.2;
-            cursor.style.left = cursorX + 'px';
-            cursor.style.top = cursorY + 'px';
-            requestAnimationFrame(animateCursor);
-        }
-        animateCursor();
-
-        // Cursor hover effect
-        document.querySelectorAll('a, button, .cyber-btn, tr').forEach(elem => {
-            elem.addEventListener('mouseenter', () => cursor.classList.add('hover'));
-            elem.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
-        });
-
-        // Create cyberpunk particles
-        function createParticles() {
-            const particlesContainer = document.getElementById('particles');
-            particlesContainer.style.position = 'fixed';
-            particlesContainer.style.top = '0';
-            particlesContainer.style.left = '0';
-            particlesContainer.style.width = '100%';
-            particlesContainer.style.height = '100%';
-            particlesContainer.style.pointerEvents = 'none';
-            particlesContainer.style.zIndex = '1';
-
-            for (let i = 0; i < 20; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                const size = Math.random() * 4 + 2;
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.bottom = '-10px';
-                particle.style.animationDelay = Math.random() * 20 + 's';
-                particle.style.animationDuration = (Math.random() * 15 + 15) + 's';
-                particlesContainer.appendChild(particle);
-            }
-        }
-
-        // Initialize
-        createParticles();
-    </script>
 </body>
 </html>

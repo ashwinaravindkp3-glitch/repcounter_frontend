@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SETS - Login</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/clean.css') }}?v={{ v }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/oled.css') }}?v={{ v }}">
     <style>
         body {
             display: flex;
@@ -14,8 +14,19 @@
         }
 
         .login-box {
-            max-width: 700px;
+            max-width: 900px;
             width: 90%;
+            border: 3px solid var(--oled-cyan);
+            position: relative;
+        }
+
+        .login-box::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 1px solid var(--oled-cyan);
+            margin: 6px;
+            pointer-events: none;
         }
 
         .header {
@@ -24,7 +35,7 @@
             justify-content: space-between;
             margin-bottom: 2rem;
             padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 2px solid var(--oled-cyan);
         }
 
         .brand-area {
@@ -34,20 +45,25 @@
         }
 
         .logo {
-            font-size: 2rem;
+            font-size: 3rem;
+            filter: drop-shadow(0 0 15px var(--oled-cyan));
         }
 
         .brand h1 {
-            font-size: 1.75rem;
-            font-weight: 600;
-            color: var(--primary);
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--oled-cyan);
             margin: 0;
+            letter-spacing: 3px;
+            text-shadow: 0 0 15px var(--oled-cyan);
         }
 
         .brand p {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
+            font-size: 0.8rem;
+            color: var(--oled-gray);
             margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
         .status-indicator {
@@ -55,47 +71,88 @@
             align-items: center;
             gap: 0.5rem;
             font-size: 0.9rem;
-            color: var(--text-secondary);
+            color: var(--oled-white);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .main-area {
             display: flex;
             align-items: center;
-            gap: 3rem;
-            padding: 2rem 0;
+            gap: 4rem;
+            padding: 3rem 0;
         }
 
         .scan-area {
             flex: 1;
             text-align: center;
+            position: relative;
         }
 
         .scan-icon {
-            font-size: 5rem;
-            opacity: 0.6;
+            font-size: 8rem;
+            color: var(--oled-cyan);
+            filter: drop-shadow(0 0 30px var(--oled-cyan));
+            animation: scanPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes scanPulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.7;
+                transform: scale(1.05);
+            }
         }
 
         .info-area {
             flex: 1;
+            border-left: 2px solid var(--oled-border);
+            padding-left: 3rem;
         }
 
         .prompt {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--text);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--oled-cyan);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--oled-cyan);
         }
 
         .status-msg {
-            color: var(--text-secondary);
+            color: var(--oled-white);
             margin-bottom: 2rem;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .clock {
-            font-size: 2rem;
-            font-weight: 300;
-            color: var(--primary);
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--oled-green);
             font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 20px var(--oled-green);
+            font-family: 'Courier New', monospace;
+            letter-spacing: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .main-area {
+                flex-direction: column;
+                gap: 2rem;
+            }
+
+            .info-area {
+                border-left: none;
+                border-top: 2px solid var(--oled-border);
+                padding-left: 0;
+                padding-top: 2rem;
+            }
         }
     </style>
 </head>

@@ -3,129 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SETS - Training Configuration</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/clean.css') }}?v={{ v }}">
+    <title>SETS - Configure Workout</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/oled.css') }}?v={{ v }}">
     <style>
         body {
-            background: var(--bg-darker);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             min-height: 100vh;
         }
 
         .selection-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            max-width: 800px;
+            width: 90%;
             padding: 2rem;
-            position: relative;
-            z-index: 10;
         }
 
         .selection-card {
-            background: linear-gradient(135deg, rgba(26, 31, 58, 0.95), rgba(10, 14, 39, 0.95));
-            border: 2px solid rgba(0, 240, 255, 0.5);
-            border-radius: 20px;
+            background: var(--oled-surface);
+            border: 3px solid var(--oled-cyan);
             padding: 3rem;
-            max-width: 700px;
-            width: 100%;
-            box-shadow:
-                0 0 60px rgba(0, 240, 255, 0.3),
-                inset 0 0 40px rgba(0, 240, 255, 0.05);
-            animation: slideUp 0.8s ease-out, borderGlow 3s infinite;
             position: relative;
-            overflow: hidden;
         }
 
-        .selection-card::before {
+        .selection-card::after {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(
-                transparent,
-                rgba(0, 240, 255, 0.1),
-                transparent 30%
-            );
-            animation: rotate 4s linear infinite;
-        }
-
-        .selection-content {
-            position: relative;
-            z-index: 1;
-        }
-
-        @keyframes rotate {
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes borderGlow {
-            0%, 100% {
-                box-shadow:
-                    0 0 60px rgba(0, 240, 255, 0.3),
-                    inset 0 0 40px rgba(0, 240, 255, 0.05);
-            }
-            50% {
-                box-shadow:
-                    0 0 80px rgba(0, 240, 255, 0.5),
-                    inset 0 0 60px rgba(0, 240, 255, 0.1);
-            }
+            inset: 0;
+            border: 1px solid var(--oled-cyan);
+            margin: 6px;
+            pointer-events: none;
         }
 
         .exercise-title {
             text-align: center;
             margin-bottom: 3rem;
-            animation: slideUp 0.6s ease-out;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--oled-border);
         }
 
         .exercise-icon {
-            font-size: 5rem;
+            font-size: 6rem;
             margin-bottom: 1rem;
-            filter: drop-shadow(0 0 20px var(--neon-cyan));
-            animation: pulse 2s infinite;
+            filter: drop-shadow(0 0 30px var(--oled-cyan));
+            animation: pulse 2s ease-in-out infinite;
         }
 
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
         }
 
         .exercise-title h1 {
-            font-family: 'Orbitron', sans-serif;
             font-size: 2.5rem;
-            font-weight: 900;
-            color: var(--neon-cyan);
-            text-shadow: var(--glow-cyan);
+            font-weight: 700;
+            color: var(--oled-cyan);
+            text-shadow: 0 0 20px var(--oled-cyan);
             margin-bottom: 0.5rem;
             letter-spacing: 4px;
         }
 
         .exercise-title p {
-            font-family: 'Rajdhani', sans-serif;
-            color: var(--neon-magenta);
-            font-size: 1.2rem;
+            color: var(--oled-gray);
+            font-size: 1rem;
             text-transform: uppercase;
             letter-spacing: 2px;
-            text-shadow: 0 0 10px var(--neon-magenta);
         }
 
         .selection-section {
             margin: 2.5rem 0;
-            animation: slideUp 0.8s ease-out;
         }
 
         .section-label {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: 700;
-            color: var(--neon-cyan);
+            color: var(--oled-cyan);
             margin-bottom: 1.5rem;
             text-align: center;
             text-transform: uppercase;
             letter-spacing: 2px;
-            text-shadow: 0 0 10px var(--neon-cyan);
         }
 
         .number-grid {
@@ -135,65 +91,37 @@
             margin-bottom: 1.5rem;
         }
 
+        .number-grid.sets-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
         .number-btn {
             aspect-ratio: 1;
-            border: 2px solid var(--neon-cyan);
+            border: 2px solid var(--oled-cyan);
             background: transparent;
-            border-radius: 10px;
-            font-family: 'Orbitron', monospace;
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: var(--neon-cyan);
+            font-family: 'Courier New', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--oled-cyan);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            overflow: hidden;
-            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
-        }
-
-        .number-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .number-btn:hover::before {
-            left: 100%;
         }
 
         .number-btn:hover {
-            transform: scale(1.1);
-            background: rgba(0, 240, 255, 0.1);
-            box-shadow: var(--glow-cyan);
+            background: var(--oled-cyan);
+            color: var(--oled-bg);
+            box-shadow: 0 0 20px var(--oled-cyan);
+            transform: scale(1.05);
         }
 
         .number-btn.selected {
-            background: var(--neon-cyan);
-            color: var(--bg-darker);
-            border-color: var(--neon-cyan);
+            background: var(--oled-cyan);
+            color: var(--oled-bg);
+            box-shadow: 0 0 30px var(--oled-cyan);
             transform: scale(1.05);
-            box-shadow: var(--glow-cyan);
-            animation: selectedPulse 2s infinite;
-        }
-
-        @keyframes selectedPulse {
-            0%, 100% {
-                box-shadow: var(--glow-cyan);
-            }
-            50% {
-                box-shadow:
-                    0 0 20px var(--neon-cyan),
-                    0 0 40px var(--neon-cyan),
-                    0 0 60px var(--neon-cyan);
-            }
         }
 
         .custom-input-section {
@@ -202,9 +130,8 @@
         }
 
         .custom-input-section label {
-            font-family: 'Rajdhani', sans-serif;
-            color: var(--text-light);
-            font-size: 1.1rem;
+            color: var(--oled-white);
+            font-size: 0.9rem;
             letter-spacing: 1px;
             text-transform: uppercase;
         }
@@ -212,23 +139,44 @@
         .custom-input {
             width: 120px;
             padding: 0.75rem;
-            border: 2px solid var(--neon-magenta);
-            background: rgba(26, 31, 58, 0.5);
-            border-radius: 10px;
-            font-family: 'Orbitron', monospace;
+            border: 2px solid var(--oled-border);
+            background: var(--oled-bg);
+            font-family: 'Courier New', monospace;
             font-size: 1.3rem;
             text-align: center;
-            font-weight: bold;
-            color: var(--neon-magenta);
+            font-weight: 700;
+            color: var(--oled-white);
             margin-left: 1rem;
-            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
-            transition: all 0.3s ease;
         }
 
         .custom-input:focus {
             outline: none;
-            box-shadow: 0 0 20px var(--neon-magenta);
-            background: rgba(26, 31, 58, 0.8);
+            border-color: var(--oled-cyan);
+            box-shadow: 0 0 15px var(--oled-cyan);
+        }
+
+        .selected-info {
+            background: var(--oled-bg);
+            border: 2px solid var(--oled-green);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .selected-info h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: var(--oled-green);
+            text-shadow: 0 0 10px var(--oled-green);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .selected-info p {
+            font-size: 1.2rem;
+            color: var(--oled-white);
+            letter-spacing: 1px;
         }
 
         .start-button {
@@ -236,45 +184,26 @@
             margin-top: 2.5rem;
             padding: 1.5rem;
             background: transparent;
-            border: 2px solid var(--neon-green);
-            color: var(--neon-green);
-            font-family: 'Rajdhani', sans-serif;
+            border: 3px solid var(--oled-green);
+            color: var(--oled-green);
             font-size: 1.5rem;
             font-weight: 700;
             letter-spacing: 3px;
             text-transform: uppercase;
             cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-        }
-
-        .start-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .start-button:hover::before {
-            left: 100%;
+            transition: all 0.3s;
+            font-family: inherit;
         }
 
         .start-button:hover:not(:disabled) {
-            background: var(--neon-green);
-            color: var(--bg-darker);
-            box-shadow: 0 0 30px var(--neon-green);
-            transform: scale(1.02);
+            background: var(--oled-green);
+            color: var(--oled-bg);
+            box-shadow: 0 0 30px var(--oled-green);
         }
 
         .start-button:disabled {
-            border-color: rgba(0, 255, 65, 0.3);
-            color: rgba(0, 255, 65, 0.3);
+            border-color: var(--oled-border);
+            color: var(--oled-gray);
             cursor: not-allowed;
         }
 
@@ -282,208 +211,98 @@
             position: fixed;
             top: 2rem;
             left: 2rem;
-            background: rgba(26, 31, 58, 0.9);
-            border: 1px solid var(--neon-cyan);
-            color: var(--neon-cyan);
+            background: var(--oled-surface);
+            border: 2px solid var(--oled-cyan);
+            color: var(--oled-cyan);
             padding: 0.75rem 1.5rem;
-            border-radius: 10px;
             text-decoration: none;
-            font-family: 'Rajdhani', sans-serif;
             font-weight: 600;
             letter-spacing: 1px;
             text-transform: uppercase;
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
-            transition: all 0.3s ease;
+            transition: all 0.3s;
             z-index: 100;
-            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
         }
 
         .back-btn:hover {
-            transform: translateX(-5px);
-            box-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
-            background: var(--neon-cyan);
-            color: var(--bg-darker);
+            background: var(--oled-cyan);
+            color: var(--oled-bg);
+            box-shadow: 0 0 20px var(--oled-cyan);
         }
 
-        .selected-info {
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(255, 0, 255, 0.2));
-            border: 2px solid var(--neon-magenta);
-            color: white;
-            padding: 1.5rem;
-            border-radius: 15px;
-            text-align: center;
-            margin-top: 2rem;
-            animation: slideUp 0.5s ease-out;
-            box-shadow: 0 0 30px rgba(255, 0, 255, 0.3);
-        }
-
-        .selected-info h3 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-            color: var(--neon-magenta);
-            text-shadow: 0 0 10px var(--neon-magenta);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .selected-info p {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.2rem;
-            color: var(--text-light);
-            letter-spacing: 1px;
-        }
-
-        /* Scan indicator */
-        .scan-indicator {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
-            animation: scanProgress 2s ease-in-out infinite;
-        }
-
-        @keyframes scanProgress {
-            0%, 100% { transform: translateX(-100%); }
-            50% { transform: translateX(100%); }
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
+        @media (max-width: 768px) {
+            .number-grid {
+                grid-template-columns: repeat(3, 1fr);
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
+
+            .number-btn {
+                font-size: 1.5rem;
+            }
+
+            .exercise-title h1 {
+                font-size: 2rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Cyberpunk Grid Background -->
-    <div class="cyber-grid"></div>
-    <div class="scan-lines"></div>
-
-    <!-- Animated Particles -->
-    <div class="particles" id="particles"></div>
-
-    <!-- Custom Cursor -->
-    <div class="custom-cursor" id="customCursor"></div>
-
-    <a href="/dashboard" class="back-btn">← RETURN TO BASE</a>
+    <a href="/dashboard" class="back-btn">← BACK</a>
 
     <div class="selection-container">
         <div class="selection-card">
-            <div class="scan-indicator"></div>
-            <div class="selection-content">
-                <div class="exercise-title">
-                    <div class="exercise-icon" id="exerciseIcon">💪</div>
-                    <h1 id="exerciseName">LOADING...</h1>
-                    <p>▶ Configure Training Parameters</p>
-                </div>
-
-                <!-- Reps Selection -->
-                <div class="selection-section">
-                    <div class="section-label">▶ Target Reps Per Set</div>
-                    <div class="number-grid">
-                        <div class="number-btn" onclick="selectReps(5)">5</div>
-                        <div class="number-btn" onclick="selectReps(8)">8</div>
-                        <div class="number-btn" onclick="selectReps(10)">10</div>
-                        <div class="number-btn" onclick="selectReps(12)">12</div>
-                        <div class="number-btn" onclick="selectReps(15)">15</div>
-                    </div>
-                    <div class="custom-input-section">
-                        <label>Custom Value:</label>
-                        <input type="number" id="customReps" class="custom-input"
-                               placeholder="0" min="1" max="100"
-                               onchange="selectReps(parseInt(this.value))">
-                    </div>
-                </div>
-
-                <!-- Sets Selection -->
-                <div class="selection-section">
-                    <div class="section-label">▶ Number of Sets</div>
-                    <div class="number-grid" style="grid-template-columns: repeat(3, 1fr);">
-                        <div class="number-btn" onclick="selectSets(1)">1</div>
-                        <div class="number-btn" onclick="selectSets(2)">2</div>
-                        <div class="number-btn" onclick="selectSets(3)">3</div>
-                        <div class="number-btn" onclick="selectSets(4)">4</div>
-                        <div class="number-btn" onclick="selectSets(5)">5</div>
-                        <div class="number-btn" onclick="selectSets(6)">6</div>
-                    </div>
-                </div>
-
-                <!-- Selected Info -->
-                <div class="selected-info" id="selectedInfo" style="display: none;">
-                    <h3>Mission Parameters</h3>
-                    <p id="summaryText"></p>
-                </div>
-
-                <!-- Start Button -->
-                <button class="start-button"
-                        id="startBtn"
-                        onclick="startWorkout()"
-                        disabled>
-                    ▶ Initialize Training Protocol
-                </button>
+            <div class="exercise-title">
+                <div class="exercise-icon" id="exerciseIcon">💪</div>
+                <h1 id="exerciseName">LOADING...</h1>
+                <p>▸ CONFIGURE PARAMETERS</p>
             </div>
+
+            <!-- Reps Selection -->
+            <div class="selection-section">
+                <div class="section-label">▸ REPS PER SET</div>
+                <div class="number-grid">
+                    <div class="number-btn" onclick="selectReps(5)">5</div>
+                    <div class="number-btn" onclick="selectReps(8)">8</div>
+                    <div class="number-btn" onclick="selectReps(10)">10</div>
+                    <div class="number-btn" onclick="selectReps(12)">12</div>
+                    <div class="number-btn" onclick="selectReps(15)">15</div>
+                </div>
+                <div class="custom-input-section">
+                    <label>CUSTOM:</label>
+                    <input type="number" id="customReps" class="custom-input"
+                           placeholder="0" min="1" max="100"
+                           onchange="selectReps(parseInt(this.value))">
+                </div>
+            </div>
+
+            <!-- Sets Selection -->
+            <div class="selection-section">
+                <div class="section-label">▸ NUMBER OF SETS</div>
+                <div class="number-grid sets-grid">
+                    <div class="number-btn" onclick="selectSets(1)">1</div>
+                    <div class="number-btn" onclick="selectSets(2)">2</div>
+                    <div class="number-btn" onclick="selectSets(3)">3</div>
+                    <div class="number-btn" onclick="selectSets(4)">4</div>
+                    <div class="number-btn" onclick="selectSets(5)">5</div>
+                    <div class="number-btn" onclick="selectSets(6)">6</div>
+                </div>
+            </div>
+
+            <!-- Selected Info -->
+            <div class="selected-info" id="selectedInfo" style="display: none;">
+                <h3>WORKOUT PARAMETERS</h3>
+                <p id="summaryText"></p>
+            </div>
+
+            <!-- Start Button -->
+            <button class="start-button"
+                    id="startBtn"
+                    onclick="startWorkout()"
+                    disabled>
+                ▸ START WORKOUT
+            </button>
         </div>
     </div>
 
     <script>
-        // Custom Cursor
-        const cursor = document.getElementById('customCursor');
-        let mouseX = 0, mouseY = 0;
-        let cursorX = 0, cursorY = 0;
-
-        document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-        });
-
-        function animateCursor() {
-            cursorX += (mouseX - cursorX) * 0.2;
-            cursorY += (mouseY - cursorY) * 0.2;
-            cursor.style.left = cursorX + 'px';
-            cursor.style.top = cursorY + 'px';
-            requestAnimationFrame(animateCursor);
-        }
-        animateCursor();
-
-        // Cursor hover effect
-        document.querySelectorAll('a, button, .number-btn').forEach(elem => {
-            elem.addEventListener('mouseenter', () => cursor.classList.add('hover'));
-            elem.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
-        });
-
-        // Create cyberpunk particles
-        function createParticles() {
-            const particlesContainer = document.getElementById('particles');
-            particlesContainer.style.position = 'fixed';
-            particlesContainer.style.top = '0';
-            particlesContainer.style.left = '0';
-            particlesContainer.style.width = '100%';
-            particlesContainer.style.height = '100%';
-            particlesContainer.style.pointerEvents = 'none';
-            particlesContainer.style.zIndex = '1';
-
-            for (let i = 0; i < 20; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                const size = Math.random() * 4 + 2;
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.bottom = '-10px';
-                particle.style.animationDelay = Math.random() * 20 + 's';
-                particle.style.animationDuration = (Math.random() * 15 + 15) + 's';
-                particlesContainer.appendChild(particle);
-            }
-        }
-
         let selectedExercise = sessionStorage.getItem('selectedExercise');
         let selectedExerciseName = sessionStorage.getItem('selectedExerciseName');
         let selectedReps = 0;
@@ -504,8 +323,6 @@
             window.location.href = '/dashboard';
         }
 
-        let syncingFromOLED = false; // Prevent loop when syncing from OLED
-
         function selectReps(reps, fromOLED = false) {
             selectedReps = reps;
             // Update UI
@@ -518,7 +335,7 @@
             document.getElementById('customReps').value = reps;
             updateSummary();
 
-            // HYBRID: Send to MCU/OLED (only if user selected on frontend)
+            // Send to MCU/OLED (only if user selected on frontend)
             if (!fromOLED) {
                 sendToMCU('reps', reps);
             }
@@ -535,13 +352,13 @@
             });
             updateSummary();
 
-            // HYBRID: Send to MCU/OLED (only if user selected on frontend)
+            // Send to MCU/OLED (only if user selected on frontend)
             if (!fromOLED) {
                 sendToMCU('sets', sets);
             }
         }
 
-        // HYBRID: Send frontend selection to MCU/OLED
+        // Send frontend selection to MCU/OLED
         async function sendToMCU(type, value) {
             try {
                 await fetch('/api/send_frontend_selection', {
@@ -570,7 +387,6 @@
         }
 
         async function startWorkout() {
-            // Send workout configuration to backend
             try {
                 const response = await fetch('/api/start_workout', {
                     method: 'POST',
@@ -585,7 +401,6 @@
                 });
 
                 if (response.ok) {
-                    // Navigate to workout monitor
                     window.location.href = '/workout_monitor';
                 } else {
                     alert('Failed to start workout. Please try again.');
@@ -596,7 +411,7 @@
             }
         }
 
-        // HYBRID: Poll for OLED selections (real-time sync)
+        // Poll for OLED selections (real-time sync)
         async function pollOLEDSelections() {
             try {
                 const response = await fetch('/api/oled_selection');
@@ -605,21 +420,18 @@
                 // Update reps if selected on OLED
                 if (data.reps && data.reps !== selectedReps) {
                     console.log(`🎮 OLED selected ${data.reps} reps - syncing frontend`);
-                    selectReps(data.reps, true); // Pass true to indicate from OLED
+                    selectReps(data.reps, true);
                 }
 
                 // Update sets if selected on OLED
                 if (data.sets && data.sets !== selectedSets) {
                     console.log(`🎮 OLED selected ${data.sets} sets - syncing frontend`);
-                    selectSets(data.sets, true); // Pass true to indicate from OLED
+                    selectSets(data.sets, true);
                 }
             } catch (error) {
                 console.log('OLED poll error (non-critical):', error);
             }
         }
-
-        // Initialize
-        createParticles();
 
         // Start polling for OLED selections every 500ms
         setInterval(pollOLEDSelections, 500);
