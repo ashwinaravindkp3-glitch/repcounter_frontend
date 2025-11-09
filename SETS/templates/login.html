@@ -3,64 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fitness Tracker | Login</title>
+    <title>SmartDumbell - Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+        .login-container {
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
         }
+
         .login-card {
-            background: white;
-            padding: 3rem;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 4rem 3rem;
             text-align: center;
-            min-width: 400px;
+            min-width: 450px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+            animation: scaleIn 0.8s ease-out;
         }
-        h1 {
-            color: #2c3e50;
+
+        .logo {
+            font-size: 5rem;
             margin-bottom: 1rem;
+            animation: pulse 2s infinite;
         }
-        .time-display {
-            font-size: 3rem;
-            color: #3498db;
-            margin: 2rem 0;
+
+        .app-title {
+            font-size: 2.5rem;
             font-weight: bold;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
         }
-        .status {
-            color: #7f8c8d;
-            font-size: 1.2rem;
+
+        .app-subtitle {
+            color: var(--gray);
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
         }
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
+
+        .time-display {
+            font-size: 4rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 2rem 0;
+            animation: slideInLeft 0.8s ease-out;
+        }
+
+        .rfid-prompt {
+            font-size: 1.3rem;
+            color: var(--dark);
+            margin: 2rem 0;
+            animation: slideInRight 0.8s ease-out;
+        }
+
+        .scan-animation {
+            position: relative;
+            width: 120px;
+            height: 120px;
             margin: 2rem auto;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        .scan-ring {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: ripple 2s infinite;
+        }
+
+        .scan-ring:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .scan-ring:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        .scan-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+        }
+
+        .status-text {
+            font-size: 1rem;
+            color: var(--gray);
+            margin-top: 2rem;
+            animation: pulse 2s infinite;
+        }
+
+        .connection-status {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            animation: slideUp 1s ease-out;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.disconnected {
+            background: var(--danger);
+        }
+
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
         }
     </style>
 </head>
 <body>
-    <div class="login-card">
-        <h1>🏋️ Fitness Tracker Pro</h1>
-        <div class="time-display">{{ current_time }}</div>
-        <p class="status">Scan your RFID card to continue</p>
-        <div class="spinner"></div>
+    <!-- Animated particles background -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Connection Status -->
+    <div class="connection-status">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="connectionText">Connected</span>
     </div>
+
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo">🏋️</div>
+            <h1 class="app-title">SmartDumbbell</h1>
+            <p class="app-subtitle">AI-Powered Rep Counter</p>
+
+            <div class="time-display" id="currentTime"></div>
+
+            <div class="scan-animation">
+                <div class="scan-ring"></div>
+                <div class="scan-ring"></div>
+                <div class="scan-ring"></div>
+                <div class="scan-icon">📱</div>
+            </div>
+
+            <p class="rfid-prompt">
+                <strong>Scan your RFID card to continue</strong>
+            </p>
+
+            <p class="status-text" id="statusText">Waiting for card scan...</p>
+        </div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 60 + 20;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.bottom = '-' + size + 'px';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (Math.random() * 20 + 15) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Update time display
+        function updateTime() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const displayHours = hours % 12 || 12;
+            document.getElementById('currentTime').textContent =
+                `${displayHours}:${minutes} ${ampm}`;
+        }
+
+        // Check connection status
+        async function checkStatus() {
+            try {
+                const response = await fetch('/api/serial_status');
+                const data = await response.json();
+
+                const statusDot = document.getElementById('statusDot');
+                const connectionText = document.getElementById('connectionText');
+                const statusText = document.getElementById('statusText');
+
+                if (data.connected) {
+                    statusDot.classList.remove('disconnected');
+                    connectionText.textContent = 'Connected';
+                    statusText.textContent = 'Waiting for card scan...';
+                } else {
+                    statusDot.classList.add('disconnected');
+                    connectionText.textContent = 'Disconnected';
+                    statusText.textContent = 'MCU not connected';
+                }
+
+                // If user is logged in, redirect to dashboard
+                if (data.current_user) {
+                    window.location.href = '/dashboard';
+                }
+            } catch (error) {
+                console.error('Status check failed:', error);
+            }
+        }
+
+        // Initialize
+        createParticles();
+        updateTime();
+        setInterval(updateTime, 1000);
+        setInterval(checkStatus, 1000);
+
+        // Initial status check
+        checkStatus();
+    </script>
 </body>
 </html>

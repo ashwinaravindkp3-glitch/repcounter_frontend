@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Workout - SmartDumbbell</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <style>
+        .selection-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .selection-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 3rem;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+            animation: scaleIn 0.6s ease-out;
+        }
+
+        .exercise-title {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .exercise-title h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .exercise-title p {
+            color: var(--gray);
+            font-size: 1.2rem;
+        }
+
+        .selection-section {
+            margin: 2.5rem 0;
+        }
+
+        .section-label {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--dark);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .number-btn {
+            aspect-ratio: 1;
+            border: 2px solid var(--primary);
+            background: white;
+            border-radius: 15px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .number-btn:hover {
+            transform: scale(1.1);
+            background: var(--primary);
+            color: white;
+        }
+
+        .number-btn.selected {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-color: var(--secondary);
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .custom-input-section {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .custom-input {
+            width: 100px;
+            padding: 0.75rem;
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            font-size: 1.2rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .start-button {
+            width: 100%;
+            margin-top: 2rem;
+            font-size: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--dark);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .selected-info {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 2rem;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .selected-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated particles background -->
+    <div class="particles" id="particles"></div>
+
+    <a href="/dashboard" class="back-btn">← Back</a>
+
+    <div class="selection-container">
+        <div class="selection-card">
+            <div class="exercise-title">
+                <h1 id="exerciseName">Loading...</h1>
+                <p>Configure your workout</p>
+            </div>
+
+            <!-- Reps Selection -->
+            <div class="selection-section">
+                <div class="section-label">Select Reps per Set</div>
+                <div class="number-grid">
+                    <div class="number-btn" onclick="selectReps(5)">5</div>
+                    <div class="number-btn" onclick="selectReps(8)">8</div>
+                    <div class="number-btn" onclick="selectReps(10)">10</div>
+                    <div class="number-btn" onclick="selectReps(12)">12</div>
+                    <div class="number-btn" onclick="selectReps(15)">15</div>
+                </div>
+                <div class="custom-input-section">
+                    <label>Custom: </label>
+                    <input type="number" id="customReps" class="custom-input"
+                           placeholder="0" min="1" max="100"
+                           onchange="selectReps(parseInt(this.value))">
+                </div>
+            </div>
+
+            <!-- Sets Selection -->
+            <div class="selection-section">
+                <div class="section-label">Select Number of Sets</div>
+                <div class="number-grid" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="number-btn" onclick="selectSets(1)">1</div>
+                    <div class="number-btn" onclick="selectSets(2)">2</div>
+                    <div class="number-btn" onclick="selectSets(3)">3</div>
+                    <div class="number-btn" onclick="selectSets(4)">4</div>
+                    <div class="number-btn" onclick="selectSets(5)">5</div>
+                    <div class="number-btn" onclick="selectSets(6)">6</div>
+                </div>
+            </div>
+
+            <!-- Selected Info -->
+            <div class="selected-info" id="selectedInfo" style="display: none;">
+                <h3>Workout Summary</h3>
+                <p id="summaryText"></p>
+            </div>
+
+            <!-- Start Button -->
+            <button class="btn btn-success btn-large start-button"
+                    id="startBtn"
+                    onclick="startWorkout()"
+                    disabled>
+                Start Workout
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let selectedExercise = sessionStorage.getItem('selectedExercise');
+        let selectedExerciseName = sessionStorage.getItem('selectedExerciseName');
+        let selectedReps = 0;
+        let selectedSets = 0;
+
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 60 + 20;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.bottom = '-' + size + 'px';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (Math.random() * 20 + 15) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Display exercise name
+        if (selectedExerciseName) {
+            document.getElementById('exerciseName').textContent = selectedExerciseName;
+        } else {
+            window.location.href = '/dashboard';
+        }
+
+        function selectReps(reps) {
+            selectedReps = reps;
+            // Update UI
+            document.querySelectorAll('.selection-section')[0].querySelectorAll('.number-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                if (parseInt(btn.textContent) === reps) {
+                    btn.classList.add('selected');
+                }
+            });
+            document.getElementById('customReps').value = reps;
+            updateSummary();
+        }
+
+        function selectSets(sets) {
+            selectedSets = sets;
+            // Update UI
+            document.querySelectorAll('.selection-section')[1].querySelectorAll('.number-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                if (parseInt(btn.textContent) === sets) {
+                    btn.classList.add('selected');
+                }
+            });
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const info = document.getElementById('selectedInfo');
+            const summaryText = document.getElementById('summaryText');
+            const startBtn = document.getElementById('startBtn');
+
+            if (selectedReps > 0 && selectedSets > 0) {
+                info.style.display = 'block';
+                summaryText.textContent = `${selectedSets} sets × ${selectedReps} reps = ${selectedSets * selectedReps} total reps`;
+                startBtn.disabled = false;
+            } else {
+                info.style.display = 'none';
+                startBtn.disabled = true;
+            }
+        }
+
+        async function startWorkout() {
+            // Send workout configuration to backend
+            try {
+                const response = await fetch('/api/start_workout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        exercise: selectedExercise,
+                        reps: selectedReps,
+                        sets: selectedSets
+                    })
+                });
+
+                if (response.ok) {
+                    // Navigate to workout monitor
+                    window.location.href = '/workout_monitor';
+                } else {
+                    alert('Failed to start workout. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error starting workout:', error);
+                alert('Error starting workout. Please check connection.');
+            }
+        }
+
+        // Initialize
+        createParticles();
+    </script>
+</body>
+</html>

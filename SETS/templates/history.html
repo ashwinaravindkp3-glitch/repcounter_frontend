@@ -2,94 +2,251 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Workout History | {{ username }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout History - SmartDumbbell</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #f5f7fa;
-            margin: 0;
-            color: #2c3e50;
-        }
-        .header {
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            color: white;
-            padding: 1.5rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .container {
+        .history-container {
+            min-height: 100vh;
             padding: 2rem;
         }
-        table {
+
+        .page-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .page-header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .history-table-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .history-table {
             width: 100%;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            border-collapse: collapse;
-            overflow: hidden;
+            border-collapse: separate;
+            border-spacing: 0;
         }
-        th {
-            background: #3498db;
+
+        .history-table thead {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
-            padding: 1rem;
+        }
+
+        .history-table th {
+            padding: 1.2rem;
             text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
         }
-        td {
-            padding: 1rem;
-            border-bottom: 1px solid #ecf0f1;
+
+        .history-table th:first-child {
+            border-top-left-radius: 15px;
         }
-        tr:hover {
-            background: #f8f9fa;
+
+        .history-table th:last-child {
+            border-top-right-radius: 15px;
         }
-        .btn {
-            background: #3498db;
-            color: white;
-            padding: 0.5rem 1.5rem;
-            border-radius: 25px;
-            text-decoration: none;
+
+        .history-table tbody tr {
+            transition: var(--transition);
+            animation: slideInLeft 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .history-table tbody tr:nth-child(1) { animation-delay: 0.1s; }
+        .history-table tbody tr:nth-child(2) { animation-delay: 0.2s; }
+        .history-table tbody tr:nth-child(3) { animation-delay: 0.3s; }
+        .history-table tbody tr:nth-child(4) { animation-delay: 0.4s; }
+        .history-table tbody tr:nth-child(5) { animation-delay: 0.5s; }
+
+        .history-table tbody tr:hover {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            transform: translateX(5px);
+        }
+
+        .history-table td {
+            padding: 1.2rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .history-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .exercise-badge {
             display: inline-block;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .stat-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--primary);
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .accuracy-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .accuracy-high {
+            background: rgba(0, 212, 170, 0.2);
+            color: var(--success);
+        }
+
+        .accuracy-medium {
+            background: rgba(255, 200, 55, 0.2);
+            color: var(--warning);
+        }
+
+        .accuracy-low {
+            background: rgba(248, 62, 112, 0.2);
+            color: var(--danger);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--gray);
+        }
+
+        .empty-state-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Workout History - {{ username }}</h1>
-        <a href="{{ url_for('dashboard') }}" class="btn">← Back</a>
+    <!-- Animated particles background -->
+    <div class="particles" id="particles"></div>
+
+    <div class="history-container">
+        <!-- Navbar -->
+        <div class="navbar">
+            <div class="navbar-brand">
+                🏋️ SmartDumbbell
+            </div>
+            <div class="navbar-links">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/history">History</a>
+                <a href="/api/logout" class="btn btn-danger" style="padding: 0.5rem 1.5rem;">Logout</a>
+            </div>
+        </div>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>📊 Workout History</h1>
+            <p style="font-size: 1.2rem; opacity: 0.9;">Track your progress, {{ username }}!</p>
+        </div>
+
+        <!-- History Table -->
+        <div class="history-table-container">
+            {% if history %}
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Exercise</th>
+                        <th>Reps × Sets</th>
+                        <th>Duration</th>
+                        <th>Accuracy</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in history %}
+                    <tr>
+                        <td>
+                            <strong>{{ row.timestamp[:10] }}</strong><br>
+                            <small style="color: var(--gray);">{{ row.timestamp[11:16] }}</small>
+                        </td>
+                        <td>
+                            <span class="exercise-badge">{{ row.exercise }}</span>
+                        </td>
+                        <td>
+                            <span class="stat-badge">{{ row.reps }} × {{ row.sets }}</span>
+                            <small style="color: var(--gray); margin-left: 0.5rem;">
+                                = {{ row.reps|int * row.sets|int }} total
+                            </small>
+                        </td>
+                        <td>
+                            ⏱️ {{ row.duration_min }} min
+                        </td>
+                        <td>
+                            {% set total_reps = row.reps|int * row.sets|int %}
+                            {% set accuracy = (row.valid_reps|int / total_reps * 100) if total_reps > 0 else 0 %}
+                            <span class="accuracy-badge
+                                {% if accuracy >= 80 %}accuracy-high
+                                {% elif accuracy >= 60 %}accuracy-medium
+                                {% else %}accuracy-low{% endif %}">
+                                {{ row.valid_reps }} / {{ total_reps }} ({{ "%.0f"|format(accuracy) }}%)
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <h3>No workouts yet</h3>
+                <p>Start your fitness journey today!</p>
+                <a href="/dashboard" class="btn btn-primary btn-large" style="margin-top: 2rem;">
+                    Start First Workout
+                </a>
+            </div>
+            {% endif %}
+        </div>
     </div>
-    
-    <div class="container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Exercise</th>
-                    <th>Reps</th>
-                    <th>Sets</th>
-                    <th>Duration</th>
-                    <th>Valid Reps</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in history %}
-                <tr>
-                    <td>{{ row.timestamp[:10] }}</td>
-                    <td>{{ row.exercise }}</td>
-                    <td>{{ row.reps }}</td>
-                    <td>{{ row.sets }}</td>
-                    <td>{{ row.duration_min }} min</td>
-                    <td>{{ row.valid_reps }}</td>
-                </tr>
-                {% endfor %}
-                {% if not history %}
-                <tr>
-                    <td colspan="6" style="text-align: center; padding: 2rem;">
-                        No workout history yet. Start exercising!
-                    </td>
-                </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 60 + 20;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.bottom = '-' + size + 'px';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (Math.random() * 20 + 15) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Initialize
+        createParticles();
+    </script>
 </body>
 </html>

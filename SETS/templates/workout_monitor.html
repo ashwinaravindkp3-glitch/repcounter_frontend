@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Monitor - SmartDumbbell</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <style>
+        .monitor-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .workout-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 3rem;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            animation: scaleIn 0.6s ease-out;
+        }
+
+        .exercise-header {
+            margin-bottom: 2rem;
+        }
+
+        .exercise-icon-large {
+            font-size: 5rem;
+            animation: pulse 2s infinite;
+        }
+
+        .exercise-name-large {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 1rem 0;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .workout-info {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .info-item {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            font-size: 1.2rem;
+        }
+
+        .info-item strong {
+            display: block;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.25rem;
+        }
+
+        .rep-display {
+            margin: 3rem 0;
+        }
+
+        .rep-counter-huge {
+            font-size: 10rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+            margin: 1rem 0;
+            animation: scaleIn 0.3s ease-out;
+        }
+
+        .rep-label {
+            font-size: 1.5rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .set-progress {
+            margin: 2rem 0;
+        }
+
+        .set-dots {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .set-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--gray);
+            transition: var(--transition);
+        }
+
+        .set-dot.completed {
+            background: var(--success);
+            transform: scale(1.2);
+        }
+
+        .set-dot.active {
+            background: var(--primary);
+            animation: pulse 1s infinite;
+        }
+
+        .calorie-display {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            margin: 2rem 0;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .calorie-value-large {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .timer-display-large {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--dark);
+            margin: 1rem 0;
+        }
+
+        .completion-screen {
+            display: none;
+            text-align: center;
+            animation: scaleIn 0.8s ease-out;
+        }
+
+        .completion-icon {
+            font-size: 8rem;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+
+        .completion-title {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--success);
+            margin-bottom: 1rem;
+        }
+
+        .completion-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .completion-stat {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+        }
+
+        .completion-stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .action-buttons-grid {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated particles background -->
+    <div class="particles" id="particles"></div>
+
+    <div class="monitor-container">
+        <!-- Workout Screen -->
+        <div class="workout-card" id="workoutScreen">
+            <div class="exercise-header">
+                <div class="exercise-icon-large" id="exerciseIcon">💪</div>
+                <div class="exercise-name-large" id="exerciseName">Loading...</div>
+            </div>
+
+            <!-- Workout Info -->
+            <div class="workout-info">
+                <div class="info-item">
+                    <strong>TARGET REPS</strong>
+                    <span id="targetReps">0</span>
+                </div>
+                <div class="info-item">
+                    <strong>CURRENT SET</strong>
+                    <span id="currentSet">1</span> / <span id="totalSets">0</span>
+                </div>
+            </div>
+
+            <!-- Status Indicator -->
+            <div class="status-indicator status-waiting" id="statusIndicator">
+                🎯 Move to starting position
+            </div>
+
+            <!-- Rep Counter -->
+            <div class="rep-display">
+                <div class="rep-counter-huge" id="repCounter">0</div>
+                <div class="rep-label">Reps Completed</div>
+            </div>
+
+            <!-- Set Progress Dots -->
+            <div class="set-progress">
+                <div class="set-dots" id="setDots"></div>
+            </div>
+
+            <!-- Calorie Burn -->
+            <div class="calorie-display">
+                <div style="font-size: 1.2rem; opacity: 0.9;">Calories Burned</div>
+                <div class="calorie-value-large">
+                    <span id="calorieValue">0</span> cal
+                </div>
+            </div>
+
+            <!-- Timer -->
+            <div class="timer-display-large">
+                ⏱️ <span id="timerDisplay">00:00</span>
+            </div>
+
+            <!-- Cancel Button -->
+            <button class="btn btn-danger" onclick="cancelWorkout()" style="margin-top: 2rem;">
+                Cancel Workout
+            </button>
+        </div>
+
+        <!-- Completion Screen -->
+        <div class="workout-card completion-screen" id="completionScreen">
+            <div class="completion-icon">🎉</div>
+            <div class="completion-title">Workout Complete!</div>
+            <p style="font-size: 1.3rem; color: var(--gray); margin-bottom: 2rem;">
+                Great job! You crushed it!
+            </p>
+
+            <div class="completion-stats">
+                <div class="completion-stat">
+                    <div>Total Reps</div>
+                    <div class="completion-stat-value" id="finalReps">0</div>
+                </div>
+                <div class="completion-stat" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                    <div>Total Sets</div>
+                    <div class="completion-stat-value" id="finalSets">0</div>
+                </div>
+                <div class="completion-stat" style="background: linear-gradient(135deg, #ff6b6b, #ee5a6f);">
+                    <div>Calories Burned</div>
+                    <div class="completion-stat-value" id="finalCalories">0</div>
+                </div>
+                <div class="completion-stat" style="background: linear-gradient(135deg, #00d4aa, #00b894);">
+                    <div>Duration</div>
+                    <div class="completion-stat-value" id="finalDuration">0:00</div>
+                </div>
+            </div>
+
+            <div class="action-buttons-grid">
+                <a href="/dashboard" class="btn btn-primary btn-large">Back to Dashboard</a>
+                <a href="/history" class="btn btn-success btn-large">View History</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let workoutData = {
+            exercise: '',
+            exerciseName: '',
+            icon: '',
+            caloriesPerRep: 0,
+            targetReps: 0,
+            totalSets: 0,
+            currentSet: 1,
+            currentReps: 0,
+            totalCalories: 0,
+            startTime: null,
+            isActive: false
+        };
+
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 60 + 20;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.bottom = '-' + size + 'px';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (Math.random() * 20 + 15) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Initialize workout
+        async function initWorkout() {
+            try {
+                const response = await fetch('/api/workout_status');
+                const data = await response.json();
+
+                if (data.active) {
+                    workoutData = { ...workoutData, ...data };
+                    updateUI();
+                    startPolling();
+                } else {
+                    alert('No active workout. Redirecting...');
+                    window.location.href = '/dashboard';
+                }
+            } catch (error) {
+                console.error('Error initializing workout:', error);
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('exerciseName').textContent = workoutData.exerciseName;
+            document.getElementById('exerciseIcon').textContent = workoutData.icon;
+            document.getElementById('targetReps').textContent = workoutData.targetReps;
+            document.getElementById('totalSets').textContent = workoutData.totalSets;
+            document.getElementById('currentSet').textContent = workoutData.currentSet;
+            document.getElementById('repCounter').textContent = workoutData.currentReps;
+            document.getElementById('calorieValue').textContent = workoutData.totalCalories.toFixed(1);
+
+            // Update set dots
+            const setDotsContainer = document.getElementById('setDots');
+            setDotsContainer.innerHTML = '';
+            for (let i = 1; i <= workoutData.totalSets; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'set-dot';
+                if (i < workoutData.currentSet) {
+                    dot.classList.add('completed');
+                } else if (i === workoutData.currentSet) {
+                    dot.classList.add('active');
+                }
+                setDotsContainer.appendChild(dot);
+            }
+
+            // Update timer
+            if (workoutData.startTime) {
+                updateTimer();
+            }
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - workoutData.startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('timerDisplay').textContent =
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Poll for updates from MCU
+        async function startPolling() {
+            setInterval(async () => {
+                try {
+                    const response = await fetch('/api/workout_updates');
+                    const data = await response.json();
+
+                    if (data.status === 'waiting') {
+                        document.getElementById('statusIndicator').className = 'status-indicator status-waiting';
+                        document.getElementById('statusIndicator').textContent = '🎯 Move to starting position';
+                    } else if (data.status === 'ready') {
+                        document.getElementById('statusIndicator').className = 'status-indicator status-ready';
+                        document.getElementById('statusIndicator').textContent = '✅ Ready! Begin workout';
+                        if (!workoutData.startTime) {
+                            workoutData.startTime = Date.now();
+                        }
+                    } else if (data.status === 'active') {
+                        document.getElementById('statusIndicator').className = 'status-indicator status-active';
+                        document.getElementById('statusIndicator').textContent = '🔥 Keep going!';
+                    }
+
+                    // Update rep count
+                    if (data.reps !== undefined && data.reps !== workoutData.currentReps) {
+                        workoutData.currentReps = data.reps;
+                        document.getElementById('repCounter').textContent = workoutData.currentReps;
+                        // Animate rep counter
+                        document.getElementById('repCounter').style.animation = 'none';
+                        setTimeout(() => {
+                            document.getElementById('repCounter').style.animation = 'scaleIn 0.3s ease-out';
+                        }, 10);
+                    }
+
+                    // Update calories
+                    if (data.calories !== undefined) {
+                        workoutData.totalCalories = data.calories;
+                        document.getElementById('calorieValue').textContent = workoutData.totalCalories.toFixed(1);
+                    }
+
+                    // Update set
+                    if (data.currentSet !== undefined && data.currentSet !== workoutData.currentSet) {
+                        workoutData.currentSet = data.currentSet;
+                        updateUI();
+                    }
+
+                    // Check for completion
+                    if (data.status === 'completed') {
+                        showCompletion(data);
+                    }
+
+                    updateTimer();
+                } catch (error) {
+                    console.error('Polling error:', error);
+                }
+            }, 500); // Poll every 500ms
+        }
+
+        function showCompletion(data) {
+            document.getElementById('workoutScreen').style.display = 'none';
+            document.getElementById('completionScreen').style.display = 'block';
+
+            document.getElementById('finalReps').textContent = data.totalReps || workoutData.currentReps;
+            document.getElementById('finalSets').textContent = workoutData.totalSets;
+            document.getElementById('finalCalories').textContent = (data.calories || workoutData.totalCalories).toFixed(1);
+
+            const elapsed = Math.floor((Date.now() - workoutData.startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('finalDuration').textContent =
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function cancelWorkout() {
+            if (confirm('Are you sure you want to cancel this workout?')) {
+                fetch('/api/cancel_workout', { method: 'POST' })
+                    .then(() => {
+                        window.location.href = '/dashboard';
+                    });
+            }
+        }
+
+        // Initialize
+        createParticles();
+        initWorkout();
+    </script>
+</body>
+</html>
