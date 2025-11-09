@@ -11,8 +11,12 @@ TIMEOUT = 0.5
 DATA_DIR = pathlib.Path("user_data")
 DATA_DIR.mkdir(exist_ok=True)
 
-# Simplified: Only 3 exercises
-EXERCISES = ["Push-ups", "Squats", "Planks"]
+# Dumbbell exercises
+EXERCISES = [
+    {"id": "bicep_curl", "name": "Bicep Curl", "icon": "💪", "calories_per_rep": 0.5},
+    {"id": "shoulder_press", "name": "Seated Shoulder Press", "icon": "🏋️", "calories_per_rep": 0.7},
+    {"id": "lateral_raise", "name": "Lateral Raise", "icon": "💥", "calories_per_rep": 0.6}
+]
 
 # RFID Users (move to CSV later)
 RFID_USERS = {

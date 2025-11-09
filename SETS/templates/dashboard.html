@@ -2,114 +2,151 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard | {{ username }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SmartDumbbell</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <style>
-        /* Modern CSS with gradients and cards */
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #f5f7fa;
-            margin: 0;
-            color: #2c3e50;
-        }
-        .header {
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            color: white;
-            padding: 1.5rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .username {
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-        .logout-btn {
-            background: #e74c3c;
-            color: white;
-            padding: 0.5rem 1.5rem;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
+        .dashboard-container {
+            min-height: 100vh;
             padding: 2rem;
         }
-        .stat-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+
+        .welcome-section {
             text-align: center;
+            margin-bottom: 3rem;
+            animation: slideUp 0.6s ease-out;
         }
-        .stat-value {
+
+        .welcome-title {
             font-size: 3rem;
-            color: #3498db;
-            font-weight: bold;
-            margin: 0.5rem 0;
-        }
-        .stat-label {
-            color: #7f8c8d;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .action-buttons {
-            padding: 2rem;
-            text-align: center;
-        }
-        .btn {
-            background: #3498db;
             color: white;
-            border: none;
-            padding: 1rem 2rem;
-            margin: 0.5rem;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
         }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+
+        .welcome-subtitle {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
         }
-        .btn-secondary {
-            background: #95a5a6;
+
+        .action-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .exercise-header {
+            text-align: center;
+            color: white;
+            margin: 3rem 0 2rem 0;
+        }
+
+        .exercise-header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .exercise-header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="username">Welcome, {{ username }}!</div>
-        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+    <!-- Animated particles background -->
+    <div class="particles" id="particles"></div>
+
+    <div class="dashboard-container">
+        <!-- Navbar -->
+        <div class="navbar">
+            <div class="navbar-brand">
+                🏋️ SmartDumbbell
+            </div>
+            <div class="navbar-links">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/history">History</a>
+                <a href="/api/logout" class="btn btn-danger" style="padding: 0.5rem 1.5rem;">Logout</a>
+            </div>
+        </div>
+
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <h1 class="welcome-title">Welcome back, {{ username }}! 👋</h1>
+            <p class="welcome-subtitle">Ready to crush your workout?</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card" style="animation-delay: 0.1s;">
+                <div class="stat-label">Total Workouts</div>
+                <div class="stat-value">{{ stats.total_workouts }}</div>
+            </div>
+            <div class="stat-card" style="animation-delay: 0.2s; background: linear-gradient(135deg, #f093fb, #f5576c);">
+                <div class="stat-label">Total Reps</div>
+                <div class="stat-value">{{ stats.total_reps }}</div>
+            </div>
+            <div class="stat-card" style="animation-delay: 0.3s; background: linear-gradient(135deg, #00d4aa, #00b894);">
+                <div class="stat-label">Avg Accuracy</div>
+                <div class="stat-value">{{ stats.avg_accuracy }}%</div>
+            </div>
+        </div>
+
+        <!-- Exercise Selection Header -->
+        <div class="exercise-header">
+            <h2>Choose Your Exercise</h2>
+            <p>Select a dumbbell exercise to begin your workout</p>
+        </div>
+
+        <!-- Exercise Cards -->
+        <div class="exercise-grid">
+            {% for exercise in exercises %}
+            <div class="exercise-card" style="animation-delay: {{ loop.index * 0.1 }}s;"
+                 onclick="selectExercise('{{ exercise.id }}', '{{ exercise.name }}')">
+                <div class="exercise-icon">{{ exercise.icon }}</div>
+                <h3 class="exercise-name">{{ exercise.name }}</h3>
+                <p style="color: var(--gray); margin-top: 0.5rem;">
+                    {{ exercise.calories_per_rep }} cal/rep
+                </p>
+                <div class="btn btn-primary" style="margin-top: 1.5rem; width: 100%;">
+                    Start Workout
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
-    
-    <div class="stats-container">
-        <div class="stat-card">
-            <div class="stat-label">Total Workouts</div>
-            <div class="stat-value">{{ stats.total_workouts }}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Total Reps</div>
-            <div class="stat-value">{{ stats.total_reps }}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Avg Accuracy</div>
-            <div class="stat-value">{{ stats.avg_accuracy }}%</div>
-        </div>
-    </div>
-    
-    <div class="action-buttons">
-        <h2>Select Exercise on OLED, then:</h2>
-        <a href="{{ url_for('history') }}" class="btn">📊 View History</a>
-        <div style="margin-top: 1rem; color: #7f8c8d;">
-            Exercise menu is on your OLED device
-        </div>
-    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 60 + 20;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.bottom = '-' + size + 'px';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (Math.random() * 20 + 15) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Select exercise
+        function selectExercise(exerciseId, exerciseName) {
+            // Store selected exercise
+            sessionStorage.setItem('selectedExercise', exerciseId);
+            sessionStorage.setItem('selectedExerciseName', exerciseName);
+
+            // Navigate to rep/sets selection
+            window.location.href = '/select_workout';
+        }
+
+        // Initialize
+        createParticles();
+    </script>
 </body>
 </html>
