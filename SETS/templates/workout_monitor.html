@@ -3,9 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Workout Monitor - SmartDumbbell</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <title>SETS - Active Training Mission</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/futuristic.css') }}">
     <style>
+        body {
+            background: var(--bg-darker);
+            min-height: 100vh;
+        }
+
         .monitor-container {
             min-height: 100vh;
             display: flex;
@@ -13,37 +19,68 @@
             align-items: center;
             justify-content: center;
             padding: 2rem;
+            position: relative;
+            z-index: 10;
         }
 
         .workout-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 30px;
+            background: linear-gradient(135deg, rgba(26, 31, 58, 0.95), rgba(10, 14, 39, 0.95));
+            border: 2px solid rgba(0, 240, 255, 0.5);
+            border-radius: 20px;
             padding: 3rem;
-            max-width: 800px;
+            max-width: 900px;
             width: 100%;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+            box-shadow:
+                0 0 60px rgba(0, 240, 255, 0.3),
+                inset 0 0 40px rgba(0, 240, 255, 0.05);
             text-align: center;
-            animation: scaleIn 0.6s ease-out;
+            animation: slideUp 0.8s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .workout-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            animation: scanProgress 2s ease-in-out infinite;
+        }
+
+        @keyframes scanProgress {
+            0%, 100% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
         }
 
         .exercise-header {
             margin-bottom: 2rem;
+            animation: slideUp 0.6s ease-out;
         }
 
         .exercise-icon-large {
-            font-size: 5rem;
+            font-size: 6rem;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 0 30px var(--neon-cyan));
             animation: pulse 2s infinite;
         }
 
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
         .exercise-name-large {
+            font-family: 'Orbitron', sans-serif;
             font-size: 2.5rem;
-            font-weight: bold;
+            font-weight: 900;
             margin: 1rem 0;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
+            letter-spacing: 4px;
+            text-transform: uppercase;
         }
 
         .workout-info {
@@ -51,92 +88,222 @@
             justify-content: center;
             gap: 2rem;
             margin: 2rem 0;
+            flex-wrap: wrap;
         }
 
         .info-item {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(255, 0, 255, 0.2));
+            border: 2px solid var(--neon-cyan);
             color: white;
             padding: 1rem 2rem;
-            border-radius: 15px;
-            font-size: 1.2rem;
+            border-radius: 12px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.4rem;
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
         }
 
         .info-item strong {
             display: block;
             font-size: 0.9rem;
-            opacity: 0.8;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px var(--neon-cyan);
             margin-bottom: 0.25rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .status-indicator {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            margin: 2rem auto;
+            max-width: 500px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            animation: statusPulse 2s infinite;
+        }
+
+        .status-waiting {
+            background: rgba(255, 153, 0, 0.2);
+            border: 2px solid var(--neon-yellow);
+            color: var(--neon-yellow);
+            text-shadow: 0 0 10px var(--neon-yellow);
+        }
+
+        .status-ready {
+            background: rgba(0, 255, 65, 0.2);
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
+            text-shadow: 0 0 10px var(--neon-green);
+        }
+
+        .status-active {
+            background: rgba(0, 240, 255, 0.2);
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
         }
 
         .rep-display {
             margin: 3rem 0;
+            position: relative;
         }
 
         .rep-counter-huge {
-            font-size: 10rem;
+            font-family: 'Orbitron', monospace;
+            font-size: 12rem;
             font-weight: bold;
-            color: var(--primary);
-            text-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
             margin: 1rem 0;
-            animation: scaleIn 0.3s ease-out;
+            animation: repGlow 2s infinite;
+            line-height: 1;
+        }
+
+        @keyframes repGlow {
+            0%, 100% {
+                text-shadow: var(--glow-cyan);
+            }
+            50% {
+                text-shadow:
+                    0 0 20px var(--neon-cyan),
+                    0 0 40px var(--neon-cyan),
+                    0 0 60px var(--neon-cyan),
+                    0 0 80px var(--neon-cyan);
+            }
         }
 
         .rep-label {
+            font-family: 'Rajdhani', sans-serif;
             font-size: 1.5rem;
-            color: var(--gray);
+            color: var(--neon-magenta);
+            text-shadow: 0 0 10px var(--neon-magenta);
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
         }
 
         .set-progress {
             margin: 2rem 0;
         }
 
+        .set-progress-text {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.2rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
         .set-dots {
             display: flex;
-            gap: 1rem;
+            gap: 1.5rem;
             justify-content: center;
             margin-top: 1rem;
         }
 
         .set-dot {
-            width: 20px;
-            height: 20px;
+            width: 25px;
+            height: 25px;
             border-radius: 50%;
-            background: var(--gray);
-            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
         }
 
         .set-dot.completed {
-            background: var(--success);
+            background: var(--neon-green);
+            border-color: var(--neon-green);
+            box-shadow: 0 0 20px var(--neon-green);
             transform: scale(1.2);
         }
 
         .set-dot.active {
-            background: var(--primary);
-            animation: pulse 1s infinite;
+            background: var(--neon-cyan);
+            border-color: var(--neon-cyan);
+            animation: dotPulse 1s infinite;
+            box-shadow: 0 0 20px var(--neon-cyan);
+        }
+
+        @keyframes dotPulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 20px var(--neon-cyan);
+            }
+            50% {
+                transform: scale(1.3);
+                box-shadow: 0 0 30px var(--neon-cyan);
+            }
         }
 
         .calorie-display {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            background: linear-gradient(135deg, rgba(255, 0, 85, 0.3), rgba(238, 90, 111, 0.3));
+            border: 2px solid var(--danger);
             color: white;
             padding: 2rem;
-            border-radius: 20px;
+            border-radius: 15px;
             margin: 2rem 0;
             animation: slideUp 0.6s ease-out;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+        }
+
+        .calorie-label {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.3rem;
+            opacity: 0.9;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--danger);
+            text-shadow: 0 0 10px var(--danger);
         }
 
         .calorie-value-large {
-            font-size: 3rem;
+            font-family: 'Orbitron', monospace;
+            font-size: 3.5rem;
             font-weight: bold;
             margin: 0.5rem 0;
+            color: var(--danger);
+            text-shadow: 0 0 20px var(--danger);
         }
 
         .timer-display-large {
+            font-family: 'Share Tech Mono', monospace;
             font-size: 2.5rem;
             font-weight: bold;
-            color: var(--dark);
-            margin: 1rem 0;
+            color: var(--neon-magenta);
+            text-shadow: 0 0 10px var(--neon-magenta);
+            margin: 1.5rem 0;
+            letter-spacing: 4px;
+        }
+
+        .cancel-btn {
+            margin-top: 2rem;
+            padding: 1rem 2.5rem;
+            background: transparent;
+            border: 2px solid var(--danger);
+            color: var(--danger);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+        }
+
+        .cancel-btn:hover {
+            background: var(--danger);
+            color: var(--bg-darker);
+            box-shadow: 0 0 30px var(--danger);
+            transform: scale(1.05);
         }
 
         .completion-screen {
@@ -145,17 +312,43 @@
             animation: scaleIn 0.8s ease-out;
         }
 
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
         .completion-icon {
-            font-size: 8rem;
+            font-size: 10rem;
             margin-bottom: 1rem;
+            filter: drop-shadow(0 0 40px var(--neon-green));
             animation: pulse 2s infinite;
         }
 
         .completion-title {
-            font-size: 3rem;
-            font-weight: bold;
-            color: var(--success);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--neon-green);
+            text-shadow: 0 0 30px var(--neon-green);
             margin-bottom: 1rem;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+        }
+
+        .completion-subtitle {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.5rem;
+            color: var(--neon-magenta);
+            text-shadow: 0 0 10px var(--neon-magenta);
+            margin-bottom: 3rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         .completion-stats {
@@ -166,71 +359,181 @@
         }
 
         .completion-stat {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(255, 0, 255, 0.2));
+            border: 2px solid var(--neon-cyan);
             color: white;
             padding: 1.5rem;
             border-radius: 15px;
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .completion-stat:nth-child(1) {
+            animation-delay: 0.1s;
+            border-color: var(--neon-cyan);
+        }
+
+        .completion-stat:nth-child(2) {
+            animation-delay: 0.2s;
+            border-color: var(--neon-magenta);
+        }
+
+        .completion-stat:nth-child(3) {
+            animation-delay: 0.3s;
+            border-color: var(--danger);
+        }
+
+        .completion-stat:nth-child(4) {
+            animation-delay: 0.4s;
+            border-color: var(--neon-green);
+        }
+
+        .completion-stat-label {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px var(--neon-cyan);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
         }
 
         .completion-stat-value {
-            font-size: 2.5rem;
+            font-family: 'Orbitron', monospace;
+            font-size: 3rem;
             font-weight: bold;
             margin: 0.5rem 0;
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
         }
 
         .action-buttons-grid {
             display: flex;
-            gap: 1rem;
+            gap: 1.5rem;
             justify-content: center;
-            margin-top: 2rem;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons-grid a {
+            padding: 1rem 2.5rem;
+            background: transparent;
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-buttons-grid a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .action-buttons-grid a:hover::before {
+            left: 100%;
+        }
+
+        .action-buttons-grid a:hover {
+            background: var(--neon-cyan);
+            color: var(--bg-darker);
+            box-shadow: var(--glow-cyan);
+            transform: scale(1.05);
+        }
+
+        .action-buttons-grid a:nth-child(2) {
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+        }
+
+        .action-buttons-grid a:nth-child(2)::before {
+            background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
+        }
+
+        .action-buttons-grid a:nth-child(2):hover {
+            background: var(--neon-green);
+            box-shadow: 0 0 30px var(--neon-green);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Animated particles background -->
+    <!-- Cyberpunk Grid Background -->
+    <div class="cyber-grid"></div>
+    <div class="scan-lines"></div>
+
+    <!-- Animated Particles -->
     <div class="particles" id="particles"></div>
+
+    <!-- Custom Cursor -->
+    <div class="custom-cursor" id="customCursor"></div>
 
     <div class="monitor-container">
         <!-- Workout Screen -->
         <div class="workout-card" id="workoutScreen">
             <div class="exercise-header">
                 <div class="exercise-icon-large" id="exerciseIcon">💪</div>
-                <div class="exercise-name-large" id="exerciseName">Loading...</div>
+                <div class="exercise-name-large" id="exerciseName">LOADING...</div>
             </div>
 
             <!-- Workout Info -->
             <div class="workout-info">
                 <div class="info-item">
-                    <strong>TARGET REPS</strong>
+                    <strong>Target Reps</strong>
                     <span id="targetReps">0</span>
                 </div>
                 <div class="info-item">
-                    <strong>CURRENT SET</strong>
+                    <strong>Current Set</strong>
                     <span id="currentSet">1</span> / <span id="totalSets">0</span>
                 </div>
             </div>
 
             <!-- Status Indicator -->
             <div class="status-indicator status-waiting" id="statusIndicator">
-                🎯 Move to starting position
+                🎯 MOVE TO STARTING POSITION
             </div>
 
             <!-- Rep Counter -->
             <div class="rep-display">
                 <div class="rep-counter-huge" id="repCounter">0</div>
-                <div class="rep-label">Reps Completed</div>
+                <div class="rep-label">▶ REPS COMPLETED</div>
             </div>
 
             <!-- Set Progress Dots -->
             <div class="set-progress">
+                <div class="set-progress-text">▶ SET PROGRESS</div>
                 <div class="set-dots" id="setDots"></div>
             </div>
 
             <!-- Calorie Burn -->
             <div class="calorie-display">
-                <div style="font-size: 1.2rem; opacity: 0.9;">Calories Burned</div>
+                <div class="calorie-label">▶ Energy Expenditure</div>
                 <div class="calorie-value-large">
-                    <span id="calorieValue">0</span> cal
+                    <span id="calorieValue">0</span> CAL
                 </div>
             </div>
 
@@ -240,46 +543,96 @@
             </div>
 
             <!-- Cancel Button -->
-            <button class="btn btn-danger" onclick="cancelWorkout()" style="margin-top: 2rem;">
-                Cancel Workout
+            <button class="cancel-btn" onclick="cancelWorkout()">
+                ✕ ABORT MISSION
             </button>
         </div>
 
         <!-- Completion Screen -->
         <div class="workout-card completion-screen" id="completionScreen">
             <div class="completion-icon">🎉</div>
-            <div class="completion-title">Workout Complete!</div>
-            <p style="font-size: 1.3rem; color: var(--gray); margin-bottom: 2rem;">
-                Great job! You crushed it!
+            <div class="completion-title">MISSION COMPLETE</div>
+            <p class="completion-subtitle">
+                ▶ Training Protocol Successfully Executed
             </p>
 
             <div class="completion-stats">
                 <div class="completion-stat">
-                    <div>Total Reps</div>
+                    <div class="completion-stat-label">Total Reps</div>
                     <div class="completion-stat-value" id="finalReps">0</div>
                 </div>
-                <div class="completion-stat" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
-                    <div>Total Sets</div>
-                    <div class="completion-stat-value" id="finalSets">0</div>
+                <div class="completion-stat">
+                    <div class="completion-stat-label">Total Sets</div>
+                    <div class="completion-stat-value" id="finalSets" style="color: var(--neon-magenta); text-shadow: var(--glow-magenta);">0</div>
                 </div>
-                <div class="completion-stat" style="background: linear-gradient(135deg, #ff6b6b, #ee5a6f);">
-                    <div>Calories Burned</div>
-                    <div class="completion-stat-value" id="finalCalories">0</div>
+                <div class="completion-stat">
+                    <div class="completion-stat-label">Calories Burned</div>
+                    <div class="completion-stat-value" id="finalCalories" style="color: var(--danger); text-shadow: 0 0 20px var(--danger);">0</div>
                 </div>
-                <div class="completion-stat" style="background: linear-gradient(135deg, #00d4aa, #00b894);">
-                    <div>Duration</div>
-                    <div class="completion-stat-value" id="finalDuration">0:00</div>
+                <div class="completion-stat">
+                    <div class="completion-stat-label">Duration</div>
+                    <div class="completion-stat-value" id="finalDuration" style="color: var(--neon-green); text-shadow: 0 0 20px var(--neon-green);">0:00</div>
                 </div>
             </div>
 
             <div class="action-buttons-grid">
-                <a href="/dashboard" class="btn btn-primary btn-large">Back to Dashboard</a>
-                <a href="/history" class="btn btn-success btn-large">View History</a>
+                <a href="/dashboard">▶ RETURN TO BASE</a>
+                <a href="/history">▶ VIEW DATA LOGS</a>
             </div>
         </div>
     </div>
 
     <script>
+        // Custom Cursor
+        const cursor = document.getElementById('customCursor');
+        let mouseX = 0, mouseY = 0;
+        let cursorX = 0, cursorY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function animateCursor() {
+            cursorX += (mouseX - cursorX) * 0.2;
+            cursorY += (mouseY - cursorY) * 0.2;
+            cursor.style.left = cursorX + 'px';
+            cursor.style.top = cursorY + 'px';
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // Cursor hover effect
+        document.querySelectorAll('a, button').forEach(elem => {
+            elem.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+            elem.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+        });
+
+        // Create cyberpunk particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            particlesContainer.style.position = 'fixed';
+            particlesContainer.style.top = '0';
+            particlesContainer.style.left = '0';
+            particlesContainer.style.width = '100%';
+            particlesContainer.style.height = '100%';
+            particlesContainer.style.pointerEvents = 'none';
+            particlesContainer.style.zIndex = '1';
+
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 4 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.bottom = '-10px';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 15 + 15) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
         let workoutData = {
             exercise: '',
             exerciseName: '',
@@ -293,23 +646,6 @@
             startTime: null,
             isActive: false
         };
-
-        // Create floating particles
-        function createParticles() {
-            const particlesContainer = document.getElementById('particles');
-            for (let i = 0; i < 20; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                const size = Math.random() * 60 + 20;
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.bottom = '-' + size + 'px';
-                particle.style.animationDelay = Math.random() * 10 + 's';
-                particle.style.animationDuration = (Math.random() * 20 + 15) + 's';
-                particlesContainer.appendChild(particle);
-            }
-        }
 
         // Initialize workout
         async function initWorkout() {
@@ -331,7 +667,7 @@
         }
 
         function updateUI() {
-            document.getElementById('exerciseName').textContent = workoutData.exerciseName;
+            document.getElementById('exerciseName').textContent = workoutData.exerciseName.toUpperCase();
             document.getElementById('exerciseIcon').textContent = workoutData.icon;
             document.getElementById('targetReps').textContent = workoutData.targetReps;
             document.getElementById('totalSets').textContent = workoutData.totalSets;
@@ -376,16 +712,16 @@
 
                     if (data.status === 'waiting') {
                         document.getElementById('statusIndicator').className = 'status-indicator status-waiting';
-                        document.getElementById('statusIndicator').textContent = '🎯 Move to starting position';
+                        document.getElementById('statusIndicator').textContent = '🎯 MOVE TO STARTING POSITION';
                     } else if (data.status === 'ready') {
                         document.getElementById('statusIndicator').className = 'status-indicator status-ready';
-                        document.getElementById('statusIndicator').textContent = '✅ Ready! Begin workout';
+                        document.getElementById('statusIndicator').textContent = '✅ READY! BEGIN TRAINING';
                         if (!workoutData.startTime) {
                             workoutData.startTime = Date.now();
                         }
                     } else if (data.status === 'active') {
                         document.getElementById('statusIndicator').className = 'status-indicator status-active';
-                        document.getElementById('statusIndicator').textContent = '🔥 Keep going!';
+                        document.getElementById('statusIndicator').textContent = '🔥 TRAINING IN PROGRESS';
                     }
 
                     // Update rep count
@@ -395,7 +731,7 @@
                         // Animate rep counter
                         document.getElementById('repCounter').style.animation = 'none';
                         setTimeout(() => {
-                            document.getElementById('repCounter').style.animation = 'scaleIn 0.3s ease-out';
+                            document.getElementById('repCounter').style.animation = 'repGlow 2s infinite';
                         }, 10);
                     }
 
@@ -439,7 +775,7 @@
         }
 
         function cancelWorkout() {
-            if (confirm('Are you sure you want to cancel this workout?')) {
+            if (confirm('Are you sure you want to abort this training mission?')) {
                 fetch('/api/cancel_workout', { method: 'POST' })
                     .then(() => {
                         window.location.href = '/dashboard';

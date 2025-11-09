@@ -33,6 +33,17 @@ workout_state = {
     'validReps': 0
 }
 
+# OLED selection tracking (for hybrid mode)
+# User can select on OLED, frontend syncs in real-time
+oled_selection = {
+    'exercise': None,
+    'exerciseName': None,
+    'icon': None,
+    'caloriesPerRep': 0,
+    'reps': None,
+    'sets': None
+}
+
 @app.route('/')
 def index():
     if rfid_auth and rfid_auth.get_current_user():
@@ -161,6 +172,37 @@ def cancel_workout():
 
     return jsonify({"success": True})
 
+@app.route('/api/oled_selection')
+def get_oled_selection():
+    """Get current OLED selections (for frontend sync)"""
+    return jsonify(oled_selection)
+
+@app.route('/api/send_frontend_selection', methods=['POST'])
+def send_frontend_selection():
+    """Send frontend selection to MCU/OLED display"""
+    if not serial_handler:
+        return jsonify({"error": "Serial not connected"}), 503
+
+    data = request.json
+    selection_type = data.get('type')  # 'exercise', 'reps', 'sets'
+    value = data.get('value')
+
+    # Send to MCU so OLED can display it
+    if selection_type == 'exercise':
+        message = f"WEB_EXERCISE|{value}\n"
+        serial_handler.send_message(message)
+        print(f"→ Web selected exercise: {value}")
+    elif selection_type == 'reps':
+        message = f"WEB_REPS|{value}\n"
+        serial_handler.send_message(message)
+        print(f"→ Web selected reps: {value}")
+    elif selection_type == 'sets':
+        message = f"WEB_SETS|{value}\n"
+        serial_handler.send_message(message)
+        print(f"→ Web selected sets: {value}")
+
+    return jsonify({"success": True})
+
 @app.route('/api/logout')
 def logout():
     if rfid_auth:
@@ -168,6 +210,16 @@ def logout():
 
     # Cancel any active workout
     workout_state['active'] = False
+
+    # Reset OLED selection
+    oled_selection.update({
+        'exercise': None,
+        'exerciseName': None,
+        'icon': None,
+        'caloriesPerRep': 0,
+        'reps': None,
+        'sets': None
+    })
 
     return redirect(url_for('index'))
 

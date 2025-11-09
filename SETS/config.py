@@ -32,5 +32,6 @@ RFID_USERS = {
 }
 
 # Web Server
-HOST = '127.0.0.1'
+HOST = '0.0.0.0'  # Listen on all interfaces
 PORT = 5000
+DISPLAY_URL = 'localhost'  # User-friendly display name

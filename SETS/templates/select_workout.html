@@ -3,243 +3,510 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Select Workout - SmartDumbbell</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <title>SETS - Training Configuration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/futuristic.css') }}">
     <style>
+        body {
+            background: var(--bg-darker);
+            min-height: 100vh;
+        }
+
         .selection-container {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 2rem;
+            position: relative;
+            z-index: 10;
         }
 
         .selection-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 30px;
+            background: linear-gradient(135deg, rgba(26, 31, 58, 0.95), rgba(10, 14, 39, 0.95));
+            border: 2px solid rgba(0, 240, 255, 0.5);
+            border-radius: 20px;
             padding: 3rem;
-            max-width: 600px;
+            max-width: 700px;
             width: 100%;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
-            animation: scaleIn 0.6s ease-out;
+            box-shadow:
+                0 0 60px rgba(0, 240, 255, 0.3),
+                inset 0 0 40px rgba(0, 240, 255, 0.05);
+            animation: slideUp 0.8s ease-out, borderGlow 3s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .selection-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                transparent,
+                rgba(0, 240, 255, 0.1),
+                transparent 30%
+            );
+            animation: rotate 4s linear infinite;
+        }
+
+        .selection-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes rotate {
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes borderGlow {
+            0%, 100% {
+                box-shadow:
+                    0 0 60px rgba(0, 240, 255, 0.3),
+                    inset 0 0 40px rgba(0, 240, 255, 0.05);
+            }
+            50% {
+                box-shadow:
+                    0 0 80px rgba(0, 240, 255, 0.5),
+                    inset 0 0 60px rgba(0, 240, 255, 0.1);
+            }
         }
 
         .exercise-title {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 3rem;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .exercise-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 0 20px var(--neon-cyan));
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .exercise-title h1 {
-            font-size: 3rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
             margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            letter-spacing: 4px;
         }
 
         .exercise-title p {
-            color: var(--gray);
+            font-family: 'Rajdhani', sans-serif;
+            color: var(--neon-magenta);
             font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--neon-magenta);
         }
 
         .selection-section {
             margin: 2.5rem 0;
+            animation: slideUp 0.8s ease-out;
         }
 
         .section-label {
+            font-family: 'Rajdhani', sans-serif;
             font-size: 1.3rem;
-            font-weight: bold;
-            color: var(--dark);
-            margin-bottom: 1rem;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            margin-bottom: 1.5rem;
             text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--neon-cyan);
         }
 
         .number-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 1rem;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .number-btn {
             aspect-ratio: 1;
-            border: 2px solid var(--primary);
-            background: white;
-            border-radius: 15px;
-            font-size: 1.5rem;
+            border: 2px solid var(--neon-cyan);
+            background: transparent;
+            border-radius: 10px;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.8rem;
             font-weight: bold;
-            color: var(--primary);
+            color: var(--neon-cyan);
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            overflow: hidden;
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+        }
+
+        .number-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .number-btn:hover::before {
+            left: 100%;
         }
 
         .number-btn:hover {
             transform: scale(1.1);
-            background: var(--primary);
-            color: white;
+            background: rgba(0, 240, 255, 0.1);
+            box-shadow: var(--glow-cyan);
         }
 
         .number-btn.selected {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border-color: var(--secondary);
+            background: var(--neon-cyan);
+            color: var(--bg-darker);
+            border-color: var(--neon-cyan);
             transform: scale(1.05);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: var(--glow-cyan);
+            animation: selectedPulse 2s infinite;
+        }
+
+        @keyframes selectedPulse {
+            0%, 100% {
+                box-shadow: var(--glow-cyan);
+            }
+            50% {
+                box-shadow:
+                    0 0 20px var(--neon-cyan),
+                    0 0 40px var(--neon-cyan),
+                    0 0 60px var(--neon-cyan);
+            }
         }
 
         .custom-input-section {
             text-align: center;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .custom-input-section label {
+            font-family: 'Rajdhani', sans-serif;
+            color: var(--text-light);
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
         .custom-input {
-            width: 100px;
+            width: 120px;
             padding: 0.75rem;
-            border: 2px solid var(--primary);
+            border: 2px solid var(--neon-magenta);
+            background: rgba(26, 31, 58, 0.5);
             border-radius: 10px;
-            font-size: 1.2rem;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.3rem;
             text-align: center;
             font-weight: bold;
+            color: var(--neon-magenta);
+            margin-left: 1rem;
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+            transition: all 0.3s ease;
+        }
+
+        .custom-input:focus {
+            outline: none;
+            box-shadow: 0 0 20px var(--neon-magenta);
+            background: rgba(26, 31, 58, 0.8);
         }
 
         .start-button {
             width: 100%;
-            margin-top: 2rem;
-            font-size: 1.5rem;
+            margin-top: 2.5rem;
             padding: 1.5rem;
+            background: transparent;
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+        }
+
+        .start-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .start-button:hover::before {
+            left: 100%;
+        }
+
+        .start-button:hover:not(:disabled) {
+            background: var(--neon-green);
+            color: var(--bg-darker);
+            box-shadow: 0 0 30px var(--neon-green);
+            transform: scale(1.02);
+        }
+
+        .start-button:disabled {
+            border-color: rgba(0, 255, 65, 0.3);
+            color: rgba(0, 255, 65, 0.3);
+            cursor: not-allowed;
         }
 
         .back-btn {
-            position: absolute;
+            position: fixed;
             top: 2rem;
             left: 2rem;
-            background: rgba(255, 255, 255, 0.9);
-            color: var(--dark);
+            background: rgba(26, 31, 58, 0.9);
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
             padding: 0.75rem 1.5rem;
-            border-radius: 50px;
+            border-radius: 10px;
             text-decoration: none;
+            font-family: 'Rajdhani', sans-serif;
             font-weight: 600;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: var(--transition);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+            transition: all 0.3s ease;
+            z-index: 100;
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
         }
 
         .back-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            transform: translateX(-5px);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
+            background: var(--neon-cyan);
+            color: var(--bg-darker);
         }
 
         .selected-info {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(255, 0, 255, 0.2));
+            border: 2px solid var(--neon-magenta);
             color: white;
             padding: 1.5rem;
             border-radius: 15px;
             text-align: center;
             margin-top: 2rem;
             animation: slideUp 0.5s ease-out;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.3);
         }
 
         .selected-info h3 {
+            font-family: 'Orbitron', sans-serif;
             font-size: 1.5rem;
             margin-bottom: 0.5rem;
+            color: var(--neon-magenta);
+            text-shadow: 0 0 10px var(--neon-magenta);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .selected-info p {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.2rem;
+            color: var(--text-light);
+            letter-spacing: 1px;
+        }
+
+        /* Scan indicator */
+        .scan-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            animation: scanProgress 2s ease-in-out infinite;
+        }
+
+        @keyframes scanProgress {
+            0%, 100% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Animated particles background -->
+    <!-- Cyberpunk Grid Background -->
+    <div class="cyber-grid"></div>
+    <div class="scan-lines"></div>
+
+    <!-- Animated Particles -->
     <div class="particles" id="particles"></div>
 
-    <a href="/dashboard" class="back-btn">← Back</a>
+    <!-- Custom Cursor -->
+    <div class="custom-cursor" id="customCursor"></div>
+
+    <a href="/dashboard" class="back-btn">← RETURN TO BASE</a>
 
     <div class="selection-container">
         <div class="selection-card">
-            <div class="exercise-title">
-                <h1 id="exerciseName">Loading...</h1>
-                <p>Configure your workout</p>
-            </div>
-
-            <!-- Reps Selection -->
-            <div class="selection-section">
-                <div class="section-label">Select Reps per Set</div>
-                <div class="number-grid">
-                    <div class="number-btn" onclick="selectReps(5)">5</div>
-                    <div class="number-btn" onclick="selectReps(8)">8</div>
-                    <div class="number-btn" onclick="selectReps(10)">10</div>
-                    <div class="number-btn" onclick="selectReps(12)">12</div>
-                    <div class="number-btn" onclick="selectReps(15)">15</div>
+            <div class="scan-indicator"></div>
+            <div class="selection-content">
+                <div class="exercise-title">
+                    <div class="exercise-icon" id="exerciseIcon">💪</div>
+                    <h1 id="exerciseName">LOADING...</h1>
+                    <p>▶ Configure Training Parameters</p>
                 </div>
-                <div class="custom-input-section">
-                    <label>Custom: </label>
-                    <input type="number" id="customReps" class="custom-input"
-                           placeholder="0" min="1" max="100"
-                           onchange="selectReps(parseInt(this.value))">
+
+                <!-- Reps Selection -->
+                <div class="selection-section">
+                    <div class="section-label">▶ Target Reps Per Set</div>
+                    <div class="number-grid">
+                        <div class="number-btn" onclick="selectReps(5)">5</div>
+                        <div class="number-btn" onclick="selectReps(8)">8</div>
+                        <div class="number-btn" onclick="selectReps(10)">10</div>
+                        <div class="number-btn" onclick="selectReps(12)">12</div>
+                        <div class="number-btn" onclick="selectReps(15)">15</div>
+                    </div>
+                    <div class="custom-input-section">
+                        <label>Custom Value:</label>
+                        <input type="number" id="customReps" class="custom-input"
+                               placeholder="0" min="1" max="100"
+                               onchange="selectReps(parseInt(this.value))">
+                    </div>
                 </div>
-            </div>
 
-            <!-- Sets Selection -->
-            <div class="selection-section">
-                <div class="section-label">Select Number of Sets</div>
-                <div class="number-grid" style="grid-template-columns: repeat(4, 1fr);">
-                    <div class="number-btn" onclick="selectSets(1)">1</div>
-                    <div class="number-btn" onclick="selectSets(2)">2</div>
-                    <div class="number-btn" onclick="selectSets(3)">3</div>
-                    <div class="number-btn" onclick="selectSets(4)">4</div>
-                    <div class="number-btn" onclick="selectSets(5)">5</div>
-                    <div class="number-btn" onclick="selectSets(6)">6</div>
+                <!-- Sets Selection -->
+                <div class="selection-section">
+                    <div class="section-label">▶ Number of Sets</div>
+                    <div class="number-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="number-btn" onclick="selectSets(1)">1</div>
+                        <div class="number-btn" onclick="selectSets(2)">2</div>
+                        <div class="number-btn" onclick="selectSets(3)">3</div>
+                        <div class="number-btn" onclick="selectSets(4)">4</div>
+                        <div class="number-btn" onclick="selectSets(5)">5</div>
+                        <div class="number-btn" onclick="selectSets(6)">6</div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Selected Info -->
-            <div class="selected-info" id="selectedInfo" style="display: none;">
-                <h3>Workout Summary</h3>
-                <p id="summaryText"></p>
-            </div>
+                <!-- Selected Info -->
+                <div class="selected-info" id="selectedInfo" style="display: none;">
+                    <h3>Mission Parameters</h3>
+                    <p id="summaryText"></p>
+                </div>
 
-            <!-- Start Button -->
-            <button class="btn btn-success btn-large start-button"
-                    id="startBtn"
-                    onclick="startWorkout()"
-                    disabled>
-                Start Workout
-            </button>
+                <!-- Start Button -->
+                <button class="start-button"
+                        id="startBtn"
+                        onclick="startWorkout()"
+                        disabled>
+                    ▶ Initialize Training Protocol
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
+        // Custom Cursor
+        const cursor = document.getElementById('customCursor');
+        let mouseX = 0, mouseY = 0;
+        let cursorX = 0, cursorY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function animateCursor() {
+            cursorX += (mouseX - cursorX) * 0.2;
+            cursorY += (mouseY - cursorY) * 0.2;
+            cursor.style.left = cursorX + 'px';
+            cursor.style.top = cursorY + 'px';
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // Cursor hover effect
+        document.querySelectorAll('a, button, .number-btn').forEach(elem => {
+            elem.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+            elem.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+        });
+
+        // Create cyberpunk particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            particlesContainer.style.position = 'fixed';
+            particlesContainer.style.top = '0';
+            particlesContainer.style.left = '0';
+            particlesContainer.style.width = '100%';
+            particlesContainer.style.height = '100%';
+            particlesContainer.style.pointerEvents = 'none';
+            particlesContainer.style.zIndex = '1';
+
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 4 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.bottom = '-10px';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 15 + 15) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
         let selectedExercise = sessionStorage.getItem('selectedExercise');
         let selectedExerciseName = sessionStorage.getItem('selectedExerciseName');
         let selectedReps = 0;
         let selectedSets = 0;
 
-        // Create floating particles
-        function createParticles() {
-            const particlesContainer = document.getElementById('particles');
-            for (let i = 0; i < 20; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                const size = Math.random() * 60 + 20;
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.bottom = '-' + size + 'px';
-                particle.style.animationDelay = Math.random() * 10 + 's';
-                particle.style.animationDuration = (Math.random() * 20 + 15) + 's';
-                particlesContainer.appendChild(particle);
-            }
-        }
+        // Exercise icons mapping
+        const exerciseIcons = {
+            'bicep_curl': '💪',
+            'shoulder_press': '🏋️',
+            'lateral_raise': '💥'
+        };
 
-        // Display exercise name
-        if (selectedExerciseName) {
-            document.getElementById('exerciseName').textContent = selectedExerciseName;
+        // Display exercise name and icon
+        if (selectedExerciseName && selectedExercise) {
+            document.getElementById('exerciseName').textContent = selectedExerciseName.toUpperCase();
+            document.getElementById('exerciseIcon').textContent = exerciseIcons[selectedExercise] || '💪';
         } else {
             window.location.href = '/dashboard';
         }
 
-        function selectReps(reps) {
+        let syncingFromOLED = false; // Prevent loop when syncing from OLED
+
+        function selectReps(reps, fromOLED = false) {
             selectedReps = reps;
             // Update UI
             document.querySelectorAll('.selection-section')[0].querySelectorAll('.number-btn').forEach(btn => {
@@ -250,9 +517,14 @@
             });
             document.getElementById('customReps').value = reps;
             updateSummary();
+
+            // HYBRID: Send to MCU/OLED (only if user selected on frontend)
+            if (!fromOLED) {
+                sendToMCU('reps', reps);
+            }
         }
 
-        function selectSets(sets) {
+        function selectSets(sets, fromOLED = false) {
             selectedSets = sets;
             // Update UI
             document.querySelectorAll('.selection-section')[1].querySelectorAll('.number-btn').forEach(btn => {
@@ -262,6 +534,24 @@
                 }
             });
             updateSummary();
+
+            // HYBRID: Send to MCU/OLED (only if user selected on frontend)
+            if (!fromOLED) {
+                sendToMCU('sets', sets);
+            }
+        }
+
+        // HYBRID: Send frontend selection to MCU/OLED
+        async function sendToMCU(type, value) {
+            try {
+                await fetch('/api/send_frontend_selection', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type, value })
+                });
+            } catch (error) {
+                console.log('MCU sync error (non-critical):', error);
+            }
         }
 
         function updateSummary() {
@@ -271,7 +561,7 @@
 
             if (selectedReps > 0 && selectedSets > 0) {
                 info.style.display = 'block';
-                summaryText.textContent = `${selectedSets} sets × ${selectedReps} reps = ${selectedSets * selectedReps} total reps`;
+                summaryText.textContent = `${selectedSets} SETS × ${selectedReps} REPS = ${selectedSets * selectedReps} TOTAL REPS`;
                 startBtn.disabled = false;
             } else {
                 info.style.display = 'none';
@@ -306,8 +596,33 @@
             }
         }
 
+        // HYBRID: Poll for OLED selections (real-time sync)
+        async function pollOLEDSelections() {
+            try {
+                const response = await fetch('/api/oled_selection');
+                const data = await response.json();
+
+                // Update reps if selected on OLED
+                if (data.reps && data.reps !== selectedReps) {
+                    console.log(`🎮 OLED selected ${data.reps} reps - syncing frontend`);
+                    selectReps(data.reps, true); // Pass true to indicate from OLED
+                }
+
+                // Update sets if selected on OLED
+                if (data.sets && data.sets !== selectedSets) {
+                    console.log(`🎮 OLED selected ${data.sets} sets - syncing frontend`);
+                    selectSets(data.sets, true); // Pass true to indicate from OLED
+                }
+            } catch (error) {
+                console.log('OLED poll error (non-critical):', error);
+            }
+        }
+
         // Initialize
         createParticles();
+
+        // Start polling for OLED selections every 500ms
+        setInterval(pollOLEDSelections, 500);
     </script>
 </body>
 </html>

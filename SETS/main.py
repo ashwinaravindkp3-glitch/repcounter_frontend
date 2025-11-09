@@ -1,5 +1,5 @@
 # main.py
-from config import SERIAL_PORT, BAUD_RATE, TIMEOUT, RFID_USERS, PORT, EXERCISES
+from config import SERIAL_PORT, BAUD_RATE, TIMEOUT, RFID_USERS, PORT, EXERCISES, DISPLAY_URL
 from serial_handler import SerialHandler
 from rfid_auth import RFIDAuth
 from database import UserDatabase
@@ -8,6 +8,39 @@ import pathlib
 import threading
 import time
 import app as flask_app
+
+# Browser auto-launch
+try:
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+    from selenium.webdriver.chrome.service import Service
+    SELENIUM_AVAILABLE = True
+except ImportError:
+    SELENIUM_AVAILABLE = False
+
+def launch_browser():
+    """Auto-launch Chrome browser with Selenium"""
+    if not SELENIUM_AVAILABLE:
+        print("ℹ️ Selenium not available. Please open browser manually.")
+        return None
+
+    try:
+        print("🌐 Launching Chrome browser...")
+        chrome_options = Options()
+        chrome_options.add_argument('--start-maximized')
+        chrome_options.add_argument('--disable-blink-features=AutomationControlled')
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        chrome_options.add_experimental_option('useAutomationExtension', False)
+
+        # Try to create driver
+        driver = webdriver.Chrome(options=chrome_options)
+        driver.get(f'http://{DISPLAY_URL}:{PORT}')
+        print(f"✓ Browser opened: http://{DISPLAY_URL}:{PORT}")
+        return driver
+    except Exception as e:
+        print(f"⚠️ Could not auto-launch browser: {e}")
+        print(f"📊 Please open manually: http://{DISPLAY_URL}:{PORT}")
+        return None
 
 def main():
     # Initialize components
@@ -25,25 +58,30 @@ def main():
     print("🚀 Starting Flask server...")
     flask_thread = threading.Thread(target=flask_app.run_flask, daemon=True)
     flask_thread.start()
-    time.sleep(1)
+    time.sleep(2)  # Give Flask time to start
+
+    # Auto-launch browser
+    browser = launch_browser()
 
     # Start serial communication
     print(f"📡 Connecting to {SERIAL_PORT}...")
     if not serial_handler.start():
         print("✗ Failed to start serial. Running in web-only mode...")
-        print(f"📊 Open browser: http://127.0.0.1:{PORT}")
+        print(f"📊 URL: http://{DISPLAY_URL}:{PORT}")
         # Keep running for web interface
         try:
             while True:
                 time.sleep(1)
         except KeyboardInterrupt:
             print("\n👋 Shutting down...")
+            if browser:
+                browser.quit()
         return
 
     print(f"✓ Serial connected: {SERIAL_PORT} @ {BAUD_RATE}")
-    print(f"📊 Open browser: http://127.0.0.1:{PORT}")
+    print(f"📊 URL: http://{DISPLAY_URL}:{PORT}")
     print("\n" + "="*50)
-    print("SmartDumbbell System Running!")
+    print("🏋️ SETS - SmartDumbbell System Running!")
     print("="*50 + "\n")
 
     # Main serial processing loop
@@ -58,6 +96,8 @@ def main():
             time.sleep(0.1)
     except KeyboardInterrupt:
         print("\n👋 Shutting down...")
+        if browser:
+            browser.quit()
     finally:
         serial_handler.stop()
 
@@ -78,6 +118,102 @@ def handle_serial_message(message: str):
         else:
             serial_handler.send_message("USER_FAIL\n")
             print(f"❌ Invalid RFID card")
+        return
+
+    # ==========================================
+    # HYBRID: Exercise Selection from OLED
+    # ==========================================
+    # Format from MCU: EXERCISE_SELECTED|exercise_id
+    # Example: EXERCISE_SELECTED|bicep_curl
+    # User chose exercise on OLED, frontend will sync and show it
+    if message.startswith("EXERCISE_SELECTED|"):
+        try:
+            exercise_id = message.split('|')[1].strip()
+            exercise_data = next((ex for ex in EXERCISES if ex['id'] == exercise_id), None)
+            if exercise_data:
+                flask_app.oled_selection.update({
+                    'exercise': exercise_id,
+                    'exerciseName': exercise_data['name'],
+                    'icon': exercise_data['icon'],
+                    'caloriesPerRep': exercise_data['calories_per_rep']
+                })
+                print(f"🎮 OLED: User selected {exercise_data['name']}")
+                print(f"   Frontend will update in real-time!")
+            else:
+                print(f"⚠️ Unknown exercise ID: {exercise_id}")
+        except (ValueError, IndexError) as e:
+            print(f"⚠️ Invalid EXERCISE_SELECTED message: {e}")
+        return
+
+    # ==========================================
+    # HYBRID: Reps Selection from OLED
+    # ==========================================
+    # Format from MCU: REPS_SELECTED|10
+    # User chose reps on OLED, frontend will sync
+    if message.startswith("REPS_SELECTED|"):
+        try:
+            reps = int(message.split('|')[1])
+            flask_app.oled_selection['reps'] = reps
+            print(f"🎮 OLED: User selected {reps} reps")
+        except (ValueError, IndexError) as e:
+            print(f"⚠️ Invalid REPS_SELECTED message: {e}")
+        return
+
+    # ==========================================
+    # HYBRID: Sets Selection from OLED
+    # ==========================================
+    # Format from MCU: SETS_SELECTED|3
+    # User chose sets on OLED, frontend will sync
+    if message.startswith("SETS_SELECTED|"):
+        try:
+            sets = int(message.split('|')[1])
+            flask_app.oled_selection['sets'] = sets
+            print(f"🎮 OLED: User selected {sets} sets")
+        except (ValueError, IndexError) as e:
+            print(f"⚠️ Invalid SETS_SELECTED message: {e}")
+        return
+
+    # ==========================================
+    # HYBRID: Workout Start Confirmation
+    # ==========================================
+    # Format from MCU: WORKOUT_START_CONFIRMED
+    # This happens when ALL selections are complete (from either OLED or Frontend)
+    # and user confirms "START" on OLED or Frontend
+    if message.startswith("WORKOUT_START_CONFIRMED"):
+        # Check if we have all required data (from OLED selections or Frontend)
+        oled = flask_app.oled_selection
+
+        # Use OLED selections if available, otherwise use what's already in workout_state
+        exercise_id = oled.get('exercise') or flask_app.workout_state.get('exercise')
+        reps = oled.get('reps') or flask_app.workout_state.get('targetReps')
+        sets = oled.get('sets') or flask_app.workout_state.get('totalSets')
+
+        if exercise_id and reps and sets:
+            exercise_data = next((ex for ex in EXERCISES if ex['id'] == exercise_id), None)
+            if exercise_data:
+                flask_app.workout_state.update({
+                    'active': True,
+                    'exercise': exercise_id,
+                    'exerciseName': exercise_data['name'],
+                    'icon': exercise_data['icon'],
+                    'caloriesPerRep': exercise_data['calories_per_rep'],
+                    'targetReps': reps,
+                    'totalSets': sets,
+                    'currentSet': 1,
+                    'currentReps': 0,
+                    'totalCalories': 0,
+                    'startTime': datetime.now().isoformat(),
+                    'status': 'waiting',
+                    'validReps': 0
+                })
+                print(f"🚀 WORKOUT STARTED:")
+                print(f"   Exercise: {exercise_data['name']}")
+                print(f"   Target: {reps} reps × {sets} sets")
+                print(f"   Both OLED & Frontend synchronized!")
+            else:
+                print(f"⚠️ Unknown exercise: {exercise_id}")
+        else:
+            print(f"⚠️ Missing workout parameters (exercise/reps/sets)")
         return
 
     # ==========================================
