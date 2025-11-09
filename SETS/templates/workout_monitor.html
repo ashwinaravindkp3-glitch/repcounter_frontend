@@ -11,20 +11,29 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            overflow: hidden;
         }
 
         .monitor-container {
-            max-width: 1000px;
-            width: 90%;
-            padding: 2rem;
+            max-width: 95vw;
+            width: 100%;
+            height: 90vh;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .workout-display {
             background: var(--oled-surface);
             border: 3px solid var(--oled-cyan);
-            padding: 3rem;
+            padding: 1.5rem;
             text-align: center;
             position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
         .workout-display::after {
@@ -36,131 +45,176 @@
             pointer-events: none;
         }
 
+        .status-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--oled-green);
+            box-shadow: 0 0 10px var(--oled-green);
+        }
+
+        .status-bar.paused {
+            background: var(--oled-yellow);
+            box-shadow: 0 0 10px var(--oled-yellow);
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
         .exercise-header {
-            margin-bottom: 2rem;
-            padding-bottom: 2rem;
+            padding-bottom: 1rem;
             border-bottom: 2px solid var(--oled-border);
+            margin-bottom: 1rem;
         }
 
         .exercise-icon {
-            font-size: 6rem;
-            filter: drop-shadow(0 0 30px var(--oled-cyan));
-            margin-bottom: 1rem;
+            font-size: 2.5rem;
+            filter: drop-shadow(0 0 20px var(--oled-cyan));
+            display: inline-block;
+            margin-right: 0.8rem;
         }
 
         .exercise-name {
-            font-size: 2.5rem;
+            display: inline-block;
+            font-size: 1.8rem;
             font-weight: 700;
             color: var(--oled-cyan);
-            text-shadow: 0 0 20px var(--oled-cyan);
-            letter-spacing: 4px;
-            margin-bottom: 1rem;
+            text-shadow: 0 0 15px var(--oled-cyan);
+            letter-spacing: 3px;
+            vertical-align: middle;
         }
 
         .workout-info {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin: 1rem 0;
-            flex-wrap: wrap;
-        }
-
-        .info-tag {
+            font-size: 0.9rem;
             color: var(--oled-white);
-            font-size: 1rem;
+            margin-top: 0.5rem;
             letter-spacing: 1px;
         }
 
-        /* Main Rep Counter */
-        .rep-display {
-            margin: 3rem 0;
-        }
-
-        .rep-label {
-            font-size: 1.2rem;
-            color: var(--oled-gray);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 1rem;
-        }
-
-        .rep-counter {
-            font-size: 10rem;
-            font-weight: 700;
-            color: var(--oled-green);
-            text-shadow: 0 0 40px var(--oled-green);
-            font-family: 'Courier New', monospace;
-            line-height: 1;
-            margin: 1rem 0;
-        }
-
-        .rep-target {
-            font-size: 2rem;
-            color: var(--oled-cyan);
-            text-shadow: 0 0 15px var(--oled-cyan);
-        }
-
-        /* Set Progress */
-        .set-progress {
-            margin: 2rem 0;
-            padding: 1.5rem;
-            border: 2px solid var(--oled-yellow);
-            background: var(--oled-bg);
-        }
-
-        .set-counter {
-            font-size: 2.5rem;
-            color: var(--oled-yellow);
-            text-shadow: 0 0 20px var(--oled-yellow);
-            font-weight: 700;
-            letter-spacing: 2px;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
+        /* Main Display Grid */
+        .main-display {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: 1fr 2fr 1fr;
             gap: 1.5rem;
-            margin: 2rem 0;
+            flex: 1;
+            align-items: center;
+        }
+
+        /* Left Stats */
+        .left-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            height: 100%;
+            justify-content: center;
         }
 
         .stat-box {
             background: var(--oled-bg);
             border: 2px solid var(--oled-cyan);
-            padding: 1.5rem;
+            padding: 1rem;
             text-align: center;
         }
 
         .stat-value {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 700;
             color: var(--oled-cyan);
-            text-shadow: 0 0 20px var(--oled-cyan);
+            text-shadow: 0 0 15px var(--oled-cyan);
             font-family: 'Courier New', monospace;
-            margin: 0.5rem 0;
+            margin: 0.3rem 0;
         }
 
         .stat-label {
+            font-size: 0.8rem;
+            color: var(--oled-gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Center Rep Counter */
+        .rep-display {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .rep-label {
+            font-size: 1rem;
+            color: var(--oled-gray);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+        }
+
+        .rep-counter {
+            font-size: 8rem;
+            font-weight: 700;
+            color: var(--oled-green);
+            text-shadow: 0 0 40px var(--oled-green);
+            font-family: 'Courier New', monospace;
+            line-height: 1;
+            margin: 0.5rem 0;
+        }
+
+        .rep-target {
+            font-size: 1.8rem;
+            color: var(--oled-cyan);
+            text-shadow: 0 0 15px var(--oled-cyan);
+            margin-top: 0.5rem;
+        }
+
+        /* Right Set Progress */
+        .set-progress {
+            background: var(--oled-bg);
+            border: 3px solid var(--oled-yellow);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .set-label {
             font-size: 0.9rem;
             color: var(--oled-gray);
             text-transform: uppercase;
             letter-spacing: 1px;
+            margin-bottom: 0.8rem;
+        }
+
+        .set-counter {
+            font-size: 3rem;
+            color: var(--oled-yellow);
+            text-shadow: 0 0 20px var(--oled-yellow);
+            font-weight: 700;
+            letter-spacing: 2px;
+            font-family: 'Courier New', monospace;
         }
 
         /* Control Buttons */
         .controls {
             display: flex;
             gap: 1rem;
-            margin-top: 2rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--oled-border);
         }
 
         .control-btn {
             flex: 1;
-            padding: 1.5rem;
-            border: 3px solid var(--oled-cyan);
+            padding: 1rem;
+            border: 2px solid var(--oled-cyan);
             background: transparent;
             color: var(--oled-cyan);
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -188,46 +242,49 @@
         /* Completion Screen */
         .completion-screen {
             display: none;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
         }
 
         .completion-icon {
-            font-size: 10rem;
+            font-size: 6rem;
             filter: drop-shadow(0 0 40px var(--oled-green));
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
         }
 
         .completion-title {
-            font-size: 3.5rem;
+            font-size: 3rem;
             font-weight: 700;
             color: var(--oled-green);
             text-shadow: 0 0 30px var(--oled-green);
-            margin-bottom: 1rem;
-            letter-spacing: 6px;
+            margin-bottom: 0.5rem;
+            letter-spacing: 5px;
         }
 
         .completion-subtitle {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             color: var(--oled-cyan);
             text-shadow: 0 0 15px var(--oled-cyan);
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
             letter-spacing: 2px;
         }
 
         .completion-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
         }
 
         .completion-stat {
             background: var(--oled-bg);
             border: 2px solid var(--oled-cyan);
-            padding: 1.5rem;
+            padding: 1rem;
         }
 
         .completion-stat-value {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 700;
             color: var(--oled-cyan);
             text-shadow: 0 0 20px var(--oled-cyan);
@@ -235,7 +292,7 @@
         }
 
         .completion-stat-label {
-            font-size: 1rem;
+            font-size: 0.85rem;
             color: var(--oled-gray);
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -243,12 +300,12 @@
         }
 
         .finish-btn {
-            margin-top: 2rem;
-            padding: 1.5rem 3rem;
+            margin-top: 1.5rem;
+            padding: 1.2rem 3rem;
             border: 3px solid var(--oled-green);
             background: transparent;
             color: var(--oled-green);
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 3px;
@@ -263,39 +320,27 @@
             box-shadow: 0 0 30px var(--oled-green);
         }
 
-        /* Status Indicator */
-        .status-bar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--oled-green);
-            box-shadow: 0 0 10px var(--oled-green);
-        }
+        @media (max-width: 1200px) {
+            .main-display {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+            }
 
-        .status-bar.paused {
-            background: var(--oled-yellow);
-            box-shadow: 0 0 10px var(--oled-yellow);
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        @media (max-width: 768px) {
             .rep-counter {
-                font-size: 6rem;
+                font-size: 5rem;
             }
 
-            .completion-title {
-                font-size: 2.5rem;
+            .completion-stats {
+                grid-template-columns: repeat(2, 1fr);
             }
 
-            .controls {
-                flex-direction: column;
+            body {
+                overflow: auto;
+            }
+
+            .monitor-container {
+                height: auto;
+                min-height: 90vh;
             }
         }
     </style>
@@ -306,40 +351,42 @@
             <div class="status-bar" id="statusBar"></div>
 
             <!-- Active Workout Screen -->
-            <div id="activeWorkout">
+            <div id="activeWorkout" style="display: flex; flex-direction: column; height: 100%;">
                 <div class="exercise-header">
-                    <div class="exercise-icon" id="exerciseIcon">💪</div>
-                    <h1 class="exercise-name" id="exerciseName">LOADING...</h1>
-                    <div class="workout-info">
-                        <span class="info-tag" id="workoutTarget">0 REPS × 0 SETS</span>
-                    </div>
+                    <span class="exercise-icon" id="exerciseIcon">💪</span>
+                    <span class="exercise-name" id="exerciseName">LOADING...</span>
+                    <div class="workout-info" id="workoutTarget">0 REPS × 0 SETS</div>
                 </div>
 
-                <!-- Rep Counter -->
-                <div class="rep-display">
-                    <div class="rep-label">CURRENT REPS</div>
-                    <div class="rep-counter" id="repCount">0</div>
-                    <div class="rep-target">/ <span id="targetReps">0</span></div>
-                </div>
-
-                <!-- Set Progress -->
-                <div class="set-progress">
-                    <div class="set-counter" id="setProgress">SET 1 / 1</div>
-                </div>
-
-                <!-- Stats -->
-                <div class="stats-grid">
-                    <div class="stat-box">
-                        <div class="stat-value" id="calories">0</div>
-                        <div class="stat-label">CALORIES</div>
+                <!-- Main Display: Left Stats | Center Rep Counter | Right Set Progress -->
+                <div class="main-display">
+                    <!-- Left Stats -->
+                    <div class="left-stats">
+                        <div class="stat-box">
+                            <div class="stat-value" id="calories">0</div>
+                            <div class="stat-label">CALORIES</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="totalReps">0</div>
+                            <div class="stat-label">TOTAL REPS</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="duration">00:00</div>
+                            <div class="stat-label">DURATION</div>
+                        </div>
                     </div>
-                    <div class="stat-box">
-                        <div class="stat-value" id="totalReps">0</div>
-                        <div class="stat-label">TOTAL REPS</div>
+
+                    <!-- Center Rep Counter -->
+                    <div class="rep-display">
+                        <div class="rep-label">CURRENT REPS</div>
+                        <div class="rep-counter" id="repCount">0</div>
+                        <div class="rep-target">/ <span id="targetReps">0</span></div>
                     </div>
-                    <div class="stat-box">
-                        <div class="stat-value" id="duration">00:00</div>
-                        <div class="stat-label">DURATION</div>
+
+                    <!-- Right Set Progress -->
+                    <div class="set-progress">
+                        <div class="set-label">SET PROGRESS</div>
+                        <div class="set-counter" id="setProgress">1/1</div>
                     </div>
                 </div>
 
@@ -353,25 +400,25 @@
             <!-- Completion Screen -->
             <div id="completionScreen" class="completion-screen">
                 <div class="completion-icon">✓</div>
-                <h1 class="completion-title">WORKOUT COMPLETE</h1>
-                <p class="completion-subtitle">MISSION ACCOMPLISHED</p>
+                <h1 class="completion-title">COMPLETE</h1>
+                <p class="completion-subtitle">WORKOUT FINISHED</p>
 
                 <div class="completion-stats">
                     <div class="completion-stat">
                         <div class="completion-stat-value" id="finalSets">0</div>
-                        <div class="completion-stat-label">SETS COMPLETED</div>
+                        <div class="completion-stat-label">SETS</div>
                     </div>
                     <div class="completion-stat">
                         <div class="completion-stat-value" id="finalReps">0</div>
-                        <div class="completion-stat-label">TOTAL REPS</div>
+                        <div class="completion-stat-label">REPS</div>
                     </div>
                     <div class="completion-stat">
                         <div class="completion-stat-value" id="finalCalories">0</div>
-                        <div class="completion-stat-label">CALORIES BURNED</div>
+                        <div class="completion-stat-label">CALORIES</div>
                     </div>
                     <div class="completion-stat">
                         <div class="completion-stat-value" id="finalDuration">0:00</div>
-                        <div class="completion-stat-label">DURATION</div>
+                        <div class="completion-stat-label">TIME</div>
                     </div>
                 </div>
 
@@ -401,23 +448,18 @@
                     return;
                 }
 
-                // Update exercise info
                 document.getElementById('exerciseName').textContent = (data.exerciseName || 'WORKOUT').toUpperCase();
                 document.getElementById('exerciseIcon').textContent = exerciseIcons[data.exercise] || '💪';
                 document.getElementById('workoutTarget').textContent = `${data.targetReps} REPS × ${data.totalSets} SETS`;
 
-                // Update rep counter
                 document.getElementById('repCount').textContent = data.currentReps || 0;
                 document.getElementById('targetReps').textContent = data.targetReps || 0;
 
-                // Update set progress
-                document.getElementById('setProgress').textContent = `SET ${data.currentSet || 1} / ${data.totalSets || 1}`;
+                document.getElementById('setProgress').textContent = `${data.currentSet || 1}/${data.totalSets || 1}`;
 
-                // Update stats
                 document.getElementById('calories').textContent = Math.round(data.totalCalories || 0);
                 document.getElementById('totalReps').textContent = ((data.currentSet - 1) * data.targetReps) + (data.currentReps || 0);
 
-                // Update status bar
                 const statusBar = document.getElementById('statusBar');
                 if (data.status === 'paused') {
                     statusBar.classList.add('paused');
@@ -429,7 +471,6 @@
                     document.getElementById('pauseBtn').textContent = 'PAUSE';
                 }
 
-                // Initialize start time for duration
                 if (!startTime && data.startTime) {
                     startTime = new Date(data.startTime);
                     startDurationTimer();
@@ -483,11 +524,9 @@
                 const data = await response.json();
 
                 if (!data.active && data.completed) {
-                    // Show completion screen
                     document.getElementById('activeWorkout').style.display = 'none';
-                    document.getElementById('completionScreen').style.display = 'block';
+                    document.getElementById('completionScreen').style.display = 'flex';
 
-                    // Populate completion stats
                     document.getElementById('finalSets').textContent = data.totalSets || 0;
                     document.getElementById('finalReps').textContent = (data.totalSets * data.targetReps) || 0;
                     document.getElementById('finalCalories').textContent = Math.round(data.totalCalories || 0);
@@ -500,7 +539,6 @@
                             `${minutes}:${seconds.toString().padStart(2, '0')}`;
                     }
 
-                    // Stop polling
                     clearInterval(window.pollInterval);
                     clearInterval(durationInterval);
                 }
@@ -513,7 +551,6 @@
             window.location.href = '/dashboard';
         }
 
-        // Start polling
         pollWorkoutState();
         window.pollInterval = setInterval(() => {
             pollWorkoutState();

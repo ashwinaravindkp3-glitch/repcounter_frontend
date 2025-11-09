@@ -11,19 +11,28 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            overflow: hidden;
         }
 
         .selection-container {
-            max-width: 800px;
-            width: 90%;
-            padding: 2rem;
+            max-width: 95vw;
+            width: 100%;
+            height: 90vh;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .selection-card {
             background: var(--oled-surface);
             border: 3px solid var(--oled-cyan);
-            padding: 3rem;
+            padding: 2rem;
             position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
         .selection-card::after {
@@ -35,50 +44,51 @@
             pointer-events: none;
         }
 
-        .exercise-title {
+        .exercise-header {
             text-align: center;
-            margin-bottom: 3rem;
-            padding-bottom: 2rem;
+            padding-bottom: 1rem;
             border-bottom: 2px solid var(--oled-border);
+            margin-bottom: 1.5rem;
         }
 
         .exercise-icon {
-            font-size: 6rem;
-            margin-bottom: 1rem;
-            filter: drop-shadow(0 0 30px var(--oled-cyan));
-            animation: pulse 2s ease-in-out infinite;
+            font-size: 3rem;
+            color: var(--oled-cyan);
+            filter: drop-shadow(0 0 20px var(--oled-cyan));
+            display: inline-block;
+            margin-right: 1rem;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
-
-        .exercise-title h1 {
-            font-size: 2.5rem;
+        .exercise-name {
+            display: inline-block;
+            font-size: 2rem;
             font-weight: 700;
             color: var(--oled-cyan);
-            text-shadow: 0 0 20px var(--oled-cyan);
-            margin-bottom: 0.5rem;
-            letter-spacing: 4px;
+            text-shadow: 0 0 15px var(--oled-cyan);
+            letter-spacing: 3px;
+            vertical-align: middle;
         }
 
-        .exercise-title p {
-            color: var(--oled-gray);
-            font-size: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+        /* Horizontal Layout */
+        .selection-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            flex: 1;
+            align-items: start;
         }
 
         .selection-section {
-            margin: 2.5rem 0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
         .section-label {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 700;
             color: var(--oled-cyan);
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             text-align: center;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -87,8 +97,8 @@
         .number-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
         }
 
         .number-grid.sets-grid {
@@ -100,7 +110,7 @@
             border: 2px solid var(--oled-cyan);
             background: transparent;
             font-family: 'Courier New', monospace;
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: var(--oled-cyan);
             cursor: pointer;
@@ -126,27 +136,27 @@
 
         .custom-input-section {
             text-align: center;
-            margin-top: 1.5rem;
+            margin-top: 1rem;
         }
 
         .custom-input-section label {
             color: var(--oled-white);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             letter-spacing: 1px;
             text-transform: uppercase;
         }
 
         .custom-input {
-            width: 120px;
-            padding: 0.75rem;
+            width: 100px;
+            padding: 0.6rem;
             border: 2px solid var(--oled-border);
             background: var(--oled-bg);
             font-family: 'Courier New', monospace;
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             text-align: center;
             font-weight: 700;
             color: var(--oled-white);
-            margin-left: 1rem;
+            margin-left: 0.5rem;
         }
 
         .custom-input:focus {
@@ -155,18 +165,25 @@
             box-shadow: 0 0 15px var(--oled-cyan);
         }
 
+        /* Bottom Section */
+        .bottom-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--oled-border);
+        }
+
         .selected-info {
             background: var(--oled-bg);
             border: 2px solid var(--oled-green);
             color: white;
-            padding: 1.5rem;
+            padding: 1rem;
             text-align: center;
-            margin-top: 2rem;
+            margin-bottom: 1rem;
         }
 
         .selected-info h3 {
-            font-size: 1.3rem;
-            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            margin-bottom: 0.3rem;
             color: var(--oled-green);
             text-shadow: 0 0 10px var(--oled-green);
             letter-spacing: 2px;
@@ -174,21 +191,25 @@
         }
 
         .selected-info p {
-            font-size: 1.2rem;
+            font-size: 1rem;
             color: var(--oled-white);
             letter-spacing: 1px;
         }
 
+        .controls {
+            display: flex;
+            gap: 1rem;
+        }
+
         .start-button {
-            width: 100%;
-            margin-top: 2.5rem;
-            padding: 1.5rem;
+            flex: 1;
+            padding: 1rem;
             background: transparent;
             border: 3px solid var(--oled-green);
             color: var(--oled-green);
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: 700;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             text-transform: uppercase;
             cursor: pointer;
             transition: all 0.3s;
@@ -209,18 +230,19 @@
 
         .back-btn {
             position: fixed;
-            top: 2rem;
-            left: 2rem;
+            top: 1rem;
+            left: 1rem;
             background: var(--oled-surface);
             border: 2px solid var(--oled-cyan);
             color: var(--oled-cyan);
-            padding: 0.75rem 1.5rem;
+            padding: 0.6rem 1.2rem;
             text-decoration: none;
             font-weight: 600;
             letter-spacing: 1px;
             text-transform: uppercase;
             transition: all 0.3s;
             z-index: 100;
+            font-size: 0.9rem;
         }
 
         .back-btn:hover {
@@ -229,17 +251,19 @@
             box-shadow: 0 0 20px var(--oled-cyan);
         }
 
-        @media (max-width: 768px) {
-            .number-grid {
-                grid-template-columns: repeat(3, 1fr);
+        @media (max-width: 1024px) {
+            .selection-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
             }
 
-            .number-btn {
-                font-size: 1.5rem;
+            body {
+                overflow: auto;
             }
 
-            .exercise-title h1 {
-                font-size: 2rem;
+            .selection-container {
+                height: auto;
+                min-height: 90vh;
             }
         }
     </style>
@@ -249,56 +273,63 @@
 
     <div class="selection-container">
         <div class="selection-card">
-            <div class="exercise-title">
-                <div class="exercise-icon" id="exerciseIcon">💪</div>
-                <h1 id="exerciseName">LOADING...</h1>
-                <p>▸ CONFIGURE PARAMETERS</p>
+            <div class="exercise-header">
+                <span class="exercise-icon" id="exerciseIcon">💪</span>
+                <span class="exercise-name" id="exerciseName">LOADING...</span>
             </div>
 
-            <!-- Reps Selection -->
-            <div class="selection-section">
-                <div class="section-label">▸ REPS PER SET</div>
-                <div class="number-grid">
-                    <div class="number-btn" onclick="selectReps(5)">5</div>
-                    <div class="number-btn" onclick="selectReps(8)">8</div>
-                    <div class="number-btn" onclick="selectReps(10)">10</div>
-                    <div class="number-btn" onclick="selectReps(12)">12</div>
-                    <div class="number-btn" onclick="selectReps(15)">15</div>
+            <!-- Horizontal Grid: Reps and Sets Side by Side -->
+            <div class="selection-grid">
+                <!-- Reps Selection -->
+                <div class="selection-section">
+                    <div class="section-label">▸ REPS PER SET</div>
+                    <div class="number-grid">
+                        <div class="number-btn" onclick="selectReps(5)">5</div>
+                        <div class="number-btn" onclick="selectReps(8)">8</div>
+                        <div class="number-btn" onclick="selectReps(10)">10</div>
+                        <div class="number-btn" onclick="selectReps(12)">12</div>
+                        <div class="number-btn" onclick="selectReps(15)">15</div>
+                    </div>
+                    <div class="custom-input-section">
+                        <label>CUSTOM:</label>
+                        <input type="number" id="customReps" class="custom-input"
+                               placeholder="0" min="1" max="100"
+                               onchange="selectReps(parseInt(this.value))">
+                    </div>
                 </div>
-                <div class="custom-input-section">
-                    <label>CUSTOM:</label>
-                    <input type="number" id="customReps" class="custom-input"
-                           placeholder="0" min="1" max="100"
-                           onchange="selectReps(parseInt(this.value))">
+
+                <!-- Sets Selection -->
+                <div class="selection-section">
+                    <div class="section-label">▸ NUMBER OF SETS</div>
+                    <div class="number-grid sets-grid">
+                        <div class="number-btn" onclick="selectSets(1)">1</div>
+                        <div class="number-btn" onclick="selectSets(2)">2</div>
+                        <div class="number-btn" onclick="selectSets(3)">3</div>
+                        <div class="number-btn" onclick="selectSets(4)">4</div>
+                        <div class="number-btn" onclick="selectSets(5)">5</div>
+                        <div class="number-btn" onclick="selectSets(6)">6</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Sets Selection -->
-            <div class="selection-section">
-                <div class="section-label">▸ NUMBER OF SETS</div>
-                <div class="number-grid sets-grid">
-                    <div class="number-btn" onclick="selectSets(1)">1</div>
-                    <div class="number-btn" onclick="selectSets(2)">2</div>
-                    <div class="number-btn" onclick="selectSets(3)">3</div>
-                    <div class="number-btn" onclick="selectSets(4)">4</div>
-                    <div class="number-btn" onclick="selectSets(5)">5</div>
-                    <div class="number-btn" onclick="selectSets(6)">6</div>
+            <!-- Bottom Section -->
+            <div class="bottom-section">
+                <!-- Selected Info -->
+                <div class="selected-info" id="selectedInfo" style="display: none;">
+                    <h3>WORKOUT PARAMETERS</h3>
+                    <p id="summaryText"></p>
+                </div>
+
+                <!-- Start Button -->
+                <div class="controls">
+                    <button class="start-button"
+                            id="startBtn"
+                            onclick="startWorkout()"
+                            disabled>
+                        ▸ START WORKOUT
+                    </button>
                 </div>
             </div>
-
-            <!-- Selected Info -->
-            <div class="selected-info" id="selectedInfo" style="display: none;">
-                <h3>WORKOUT PARAMETERS</h3>
-                <p id="summaryText"></p>
-            </div>
-
-            <!-- Start Button -->
-            <button class="start-button"
-                    id="startBtn"
-                    onclick="startWorkout()"
-                    disabled>
-                ▸ START WORKOUT
-            </button>
         </div>
     </div>
 
@@ -308,14 +339,12 @@
         let selectedReps = 0;
         let selectedSets = 0;
 
-        // Exercise icons mapping
         const exerciseIcons = {
             'bicep_curl': '💪',
             'shoulder_press': '🏋️',
             'lateral_raise': '💥'
         };
 
-        // Display exercise name and icon
         if (selectedExerciseName && selectedExercise) {
             document.getElementById('exerciseName').textContent = selectedExerciseName.toUpperCase();
             document.getElementById('exerciseIcon').textContent = exerciseIcons[selectedExercise] || '💪';
@@ -325,7 +354,6 @@
 
         function selectReps(reps, fromOLED = false) {
             selectedReps = reps;
-            // Update UI
             document.querySelectorAll('.selection-section')[0].querySelectorAll('.number-btn').forEach(btn => {
                 btn.classList.remove('selected');
                 if (parseInt(btn.textContent) === reps) {
@@ -335,7 +363,6 @@
             document.getElementById('customReps').value = reps;
             updateSummary();
 
-            // Send to MCU/OLED (only if user selected on frontend)
             if (!fromOLED) {
                 sendToMCU('reps', reps);
             }
@@ -343,7 +370,6 @@
 
         function selectSets(sets, fromOLED = false) {
             selectedSets = sets;
-            // Update UI
             document.querySelectorAll('.selection-section')[1].querySelectorAll('.number-btn').forEach(btn => {
                 btn.classList.remove('selected');
                 if (parseInt(btn.textContent) === sets) {
@@ -352,13 +378,11 @@
             });
             updateSummary();
 
-            // Send to MCU/OLED (only if user selected on frontend)
             if (!fromOLED) {
                 sendToMCU('sets', sets);
             }
         }
 
-        // Send frontend selection to MCU/OLED
         async function sendToMCU(type, value) {
             try {
                 await fetch('/api/send_frontend_selection', {
@@ -411,19 +435,16 @@
             }
         }
 
-        // Poll for OLED selections (real-time sync)
         async function pollOLEDSelections() {
             try {
                 const response = await fetch('/api/oled_selection');
                 const data = await response.json();
 
-                // Update reps if selected on OLED
                 if (data.reps && data.reps !== selectedReps) {
                     console.log(`🎮 OLED selected ${data.reps} reps - syncing frontend`);
                     selectReps(data.reps, true);
                 }
 
-                // Update sets if selected on OLED
                 if (data.sets && data.sets !== selectedSets) {
                     console.log(`🎮 OLED selected ${data.sets} sets - syncing frontend`);
                     selectSets(data.sets, true);
@@ -433,7 +454,6 @@
             }
         }
 
-        // Start polling for OLED selections every 500ms
         setInterval(pollOLEDSelections, 500);
     </script>
 </body>
