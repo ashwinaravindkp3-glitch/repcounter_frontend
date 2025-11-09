@@ -51,14 +51,31 @@ class UserDatabase:
         history = self.get_workout_history(username)
         if not history:
             return {"total_workouts": 0, "total_reps": 0, "avg_accuracy": 0}
-        
+
         total_workouts = len(history)
-        total_reps = sum(int(row["reps"]) * int(row["sets"]) for row in history)
-        avg_accuracy = sum(int(row["valid_reps"]) / (int(row["reps"]) * int(row["sets"])) * 100 
-                         for row in history) / total_workouts if total_workouts > 0 else 0
-        
+        total_reps = 0
+        total_accuracy = 0
+        valid_entries = 0
+
+        for row in history:
+            try:
+                reps = int(row.get("reps", 0))
+                sets = int(row.get("sets", 1))
+                valid_reps = int(row.get("valid_reps", reps * sets))
+
+                total_reps += reps * sets
+                accuracy = (valid_reps / (reps * sets) * 100) if (reps * sets) > 0 else 100
+                total_accuracy += accuracy
+                valid_entries += 1
+            except (ValueError, KeyError, ZeroDivisionError) as e:
+                # Skip invalid rows
+                print(f"Warning: Skipping invalid workout row: {e}")
+                continue
+
+        avg_accuracy = total_accuracy / valid_entries if valid_entries > 0 else 0
+
         return {
-            "total_workouts": total_workouts,
+            "total_workouts": valid_entries,
             "total_reps": total_reps,
             "avg_accuracy": round(avg_accuracy, 1)
         }

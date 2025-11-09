@@ -111,7 +111,32 @@ def main():
 
 def handle_serial_message(message: str):
     """Process messages from MCU"""
-    print(f"← MCU: {message}")
+
+    # Filter out Arduino debug/display messages
+    debug_keywords = [
+        "→ Frontend:", "← RX:", "→", "←",
+        "─────", "═════", "╔", "╚", "║",
+        "All selections complete", "Press 'c' to confirm",
+        "Press 'm' for menu", "Auto-demo complete",
+        "TIP:", "Unknown command", "HYBRID MODE DEMONSTRATED",
+        "DEMO SEQUENCE COMPLETE", "Frontend synchronized",
+        "Exercise:", "Reps:", "Sets:", "OLED Display State"
+    ]
+
+    # Skip Arduino debug output
+    if any(keyword in message for keyword in debug_keywords):
+        return
+
+    # Only print actual protocol messages
+    protocol_messages = [
+        "UID_REQ|", "EXERCISE_SELECTED|", "REPS_SELECTED|",
+        "SETS_SELECTED|", "WORKOUT_START_CONFIRMED", "STATUS|",
+        "REP_COUNT|", "SET_PROGRESS|", "CALORIES|",
+        "WORKOUT_COMPLETE|", "POSITION|"
+    ]
+
+    if any(message.startswith(protocol) for protocol in protocol_messages):
+        print(f"← MCU: {message}")
 
     # ==========================================
     # RFID Login
@@ -334,9 +359,9 @@ def handle_serial_message(message: str):
         return
 
     # ==========================================
-    # Debug/Unknown Messages
+    # Debug/Unknown Messages (filtered - no spam)
     # ==========================================
-    print(f"ℹ️ Unhandled message: {message}")
+    # Silently ignore unrecognized messages to keep console clean
 
 if __name__ == "__main__":
     main()
