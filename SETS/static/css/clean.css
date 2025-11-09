@@ -1,0 +1,196 @@
+/* ================================================
+   SETS - Clean Minimal Design
+   ================================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Clean Modern Colors */
+    --primary: #00a8ff;
+    --dark: #0f1419;
+    --darker: #080a0d;
+    --card: #1a1f2e;
+    --text: #e8eaed;
+    --text-muted: #8b95a8;
+    --border: rgba(0, 168, 255, 0.2);
+    --success: #00c851;
+    --danger: #ff4444;
+}
+
+body {
+    font-family: 'Rajdhani', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+    color: var(--text);
+    min-height: 100vh;
+    cursor: default;
+}
+
+/* ================================================
+   NAVIGATION
+   ================================================ */
+
+nav {
+    background: rgba(26, 31, 46, 0.95);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem;
+    backdrop-filter: blur(10px);
+}
+
+nav .nav-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+nav .brand {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+nav .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+}
+
+nav a {
+    color: var(--text);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+nav a:hover {
+    color: var(--primary);
+}
+
+/* ================================================
+   CARDS
+   ================================================ */
+
+.card {
+    background: rgba(26, 31, 46, 0.6);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+}
+
+.card-header {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--primary);
+}
+
+/* ================================================
+   BUTTONS
+   ================================================ */
+
+button, .btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+button:hover, .btn:hover {
+    background: #0088cc;
+    transform: translateY(-1px);
+}
+
+button:active, .btn:active {
+    transform: translateY(0);
+}
+
+button.secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+}
+
+button.secondary:hover {
+    background: rgba(0, 168, 255, 0.1);
+}
+
+/* ================================================
+   STATUS INDICATORS
+   ================================================ */
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 0.5rem;
+}
+
+.status-dot.online {
+    background: var(--success);
+}
+
+.status-dot.offline {
+    background: var(--danger);
+}
+
+/* ================================================
+   UTILITIES
+   ================================================ */
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-muted {
+    color: var(--text-muted);
+}
+
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+
+.grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.grid-2 {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.grid-3 {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+/* ================================================
+   ANIMATIONS (Minimal)
+   ================================================ */
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}

@@ -5,141 +5,103 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SETS - System Access</title>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/clean.css') }}?v={{ v }}">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Rajdhani', sans-serif;
-            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
-            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #e0e6ff;
+            min-height: 100vh;
         }
 
         .login-container {
-            max-width: 900px;
+            max-width: 800px;
             width: 90%;
-            background: rgba(26, 31, 58, 0.6);
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            border-radius: 12px;
-            padding: 3rem;
-            backdrop-filter: blur(10px);
         }
 
         .header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 3rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
         }
 
-        .logo-section {
+        .brand-section {
             display: flex;
             align-items: center;
             gap: 1rem;
         }
 
         .logo {
-            font-size: 2.5rem;
+            font-size: 2rem;
         }
 
         .brand h1 {
-            font-size: 2rem;
+            font-size: 1.75rem;
             font-weight: 600;
-            color: #00f0ff;
-            letter-spacing: 2px;
+            color: var(--primary);
         }
 
         .brand p {
-            font-size: 0.9rem;
-            color: #8b96b8;
-            font-weight: 300;
+            font-size: 0.85rem;
+            color: var(--text-muted);
         }
 
         .status {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
         }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: #00ff41;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        .status-dot.disconnected {
-            background: #ff0055;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .main-content {
+        .content {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 3rem;
+            padding: 2rem 0;
         }
 
-        .left-section {
+        .scan-section {
             flex: 1;
+            text-align: center;
         }
 
         .scan-icon {
-            font-size: 8rem;
-            opacity: 0.6;
-            animation: scanPulse 2s ease-in-out infinite;
+            font-size: 6rem;
+            opacity: 0.7;
         }
 
-        @keyframes scanPulse {
-            0%, 100% { transform: scale(1); opacity: 0.6; }
-            50% { transform: scale(1.05); opacity: 0.8; }
-        }
-
-        .right-section {
+        .info-section {
             flex: 1;
         }
 
         .prompt {
             font-size: 1.5rem;
             font-weight: 600;
-            margin-bottom: 1rem;
-            color: #00f0ff;
+            margin-bottom: 0.5rem;
         }
 
         .status-text {
-            font-size: 1rem;
-            color: #8b96b8;
+            color: var(--text-muted);
             margin-bottom: 2rem;
         }
 
-        .time-display {
-            font-size: 2.5rem;
+        .time {
+            font-size: 2rem;
             font-weight: 300;
-            color: #00f0ff;
+            color: var(--primary);
             font-variant-numeric: tabular-nums;
-            letter-spacing: 3px;
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
+    <div class="login-container card">
         <div class="header">
-            <div class="logo-section">
+            <div class="brand-section">
                 <div class="logo">🏋️</div>
                 <div class="brand">
                     <h1>SETS</h1>
@@ -147,66 +109,59 @@
                 </div>
             </div>
             <div class="status">
-                <div class="status-dot" id="statusDot"></div>
+                <span class="status-dot" id="statusDot"></span>
                 <span id="connectionText">Connecting...</span>
             </div>
         </div>
 
-        <div class="main-content">
-            <div class="left-section">
+        <div class="content">
+            <div class="scan-section">
                 <div class="scan-icon">📡</div>
             </div>
-            <div class="right-section">
+            <div class="info-section">
                 <div class="prompt">Scan RFID Card</div>
                 <div class="status-text" id="statusText">Awaiting Authentication</div>
-                <div class="time-display" id="currentTime">00:00:00</div>
+                <div class="time" id="currentTime">00:00:00</div>
             </div>
         </div>
     </div>
 
     <script>
-        // Update time display
         function updateTime() {
             const now = new Date();
-            const hours = now.getHours().toString().padStart(2, '0');
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const seconds = now.getSeconds().toString().padStart(2, '0');
-            document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
+            const h = now.getHours().toString().padStart(2, '0');
+            const m = now.getMinutes().toString().padStart(2, '0');
+            const s = now.getSeconds().toString().padStart(2, '0');
+            document.getElementById('currentTime').textContent = `${h}:${m}:${s}`;
         }
 
-        // Check connection status
         async function checkStatus() {
             try {
                 const response = await fetch('/api/serial_status');
                 const data = await response.json();
-
-                const statusDot = document.getElementById('statusDot');
-                const connectionText = document.getElementById('connectionText');
-                const statusText = document.getElementById('statusText');
+                const dot = document.getElementById('statusDot');
+                const text = document.getElementById('connectionText');
+                const status = document.getElementById('statusText');
 
                 if (data.connected) {
-                    statusDot.classList.remove('disconnected');
-                    connectionText.textContent = 'System Online';
-                    statusText.textContent = 'Awaiting Authentication';
+                    dot.className = 'status-dot online';
+                    text.textContent = 'System Online';
+                    status.textContent = 'Awaiting Authentication';
                 } else {
-                    statusDot.classList.add('disconnected');
-                    connectionText.textContent = 'MCU Offline';
-                    statusText.textContent = 'Connection Error';
+                    dot.className = 'status-dot offline';
+                    text.textContent = 'MCU Offline';
+                    status.textContent = 'Connection Error';
                 }
 
-                // If user is logged in, redirect to dashboard
                 if (data.current_user) {
-                    statusText.textContent = 'Access Granted';
-                    setTimeout(() => {
-                        window.location.href = '/dashboard';
-                    }, 500);
+                    status.textContent = 'Access Granted';
+                    setTimeout(() => window.location.href = '/dashboard', 500);
                 }
             } catch (error) {
                 console.error('Status check failed:', error);
             }
         }
 
-        // Initialize
         updateTime();
         setInterval(updateTime, 1000);
         setInterval(checkStatus, 1000);
