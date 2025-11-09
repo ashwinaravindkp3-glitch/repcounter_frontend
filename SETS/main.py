@@ -110,7 +110,7 @@ def main():
         serial_handler.stop()
 
 def handle_serial_message(message: str):
-    """Process messages from MCU"""
+    """Process messages from MCU - Full Protocol Implementation"""
 
     # Filter out Arduino debug/display messages
     debug_keywords = [
@@ -129,19 +129,27 @@ def handle_serial_message(message: str):
 
     # Only print actual protocol messages
     protocol_messages = [
-        "UID_REQ|", "EXERCISE_SELECTED|", "REPS_SELECTED|",
-        "SETS_SELECTED|", "WORKOUT_START_CONFIRMED", "STATUS|",
-        "REP_COUNT|", "SET_PROGRESS|", "CALORIES|",
-        "WORKOUT_COMPLETE|", "POSITION|"
+        "UID_REQ|", "USER_OK|", "USER_FAIL",
+        "CFG_EXERCISE|", "CFG_REPS|", "CFG_SETS|",
+        "CMD_EXERCISE|", "CMD_REPS|", "CMD_SETS|",
+        "WORKOUT_START|", "WORKOUT_PAUSE|", "WORKOUT_RESUME|",
+        "WORKOUT_STOP|", "WORKOUT_END|",
+        "REP_DETECT|", "SET_COMPLETE|", "IMU_DATA|",
+        "HEARTBEAT|", "PING", "PONG|", "ERROR|",
+        # Legacy messages for backward compatibility
+        "EXERCISE_SELECTED|", "REPS_SELECTED|", "SETS_SELECTED|",
+        "WORKOUT_START_CONFIRMED", "STATUS|", "REP_COUNT|",
+        "SET_PROGRESS|", "CALORIES|", "WORKOUT_COMPLETE|", "POSITION|"
     ]
 
     if any(message.startswith(protocol) for protocol in protocol_messages):
         print(f"← MCU: {message}")
 
     # ==========================================
-    # RFID Login
+    # A. AUTHENTICATION
     # ==========================================
-    # Format from MCU: UID_REQ|7D133721 AB CD EF
+
+    # UID_REQ|7D 13 37 21 78
     uid = rfid_auth.parse_uid_message(message)
     if uid:
         is_valid, username = rfid_auth.login(uid)
@@ -151,6 +159,220 @@ def handle_serial_message(message: str):
         else:
             serial_handler.send_message("USER_FAIL\n")
             print(f"❌ Invalid RFID card")
+        return
+
+    # ==========================================
+    # B. WORKOUT CONFIGURATION SYNC
+    # ==========================================
+
+    # CFG_EXERCISE|1|Squats
+    if message.startswith("CFG_EXERCISE|"):
+        try:
+            parts = message.split('|')
+            exercise_id = int(parts[1])
+            exercise_name = parts[2] if len(parts) > 2 else ""
+
+            # Map exercise ID to our system
+            exercise_map = {
+                0: "bicep_curl",
+                1: "shoulder_press",  # Or map to squats if you have it
+                2: "lateral_raise"     # Or map to overhead press
+            }
+
+            mapped_id = exercise_map.get(exercise_id, "bicep_curl")
+            exercise_data = next((ex for ex in EXERCISES if ex['id'] == mapped_id), None)
+
+            if exercise_data:
+                flask_app.oled_selection.update({
+                    'exercise': mapped_id,
+                    'exerciseName': exercise_data['name'],
+                    'icon': exercise_data['icon'],
+                    'caloriesPerRep': exercise_data['calories_per_rep']
+                })
+                print(f"🎮 OLED: Exercise configured - {exercise_data['name']} (ID: {exercise_id})")
+        except (ValueError, IndexError) as e:
+            print(f"⚠️ Invalid CFG_EXERCISE message: {e}")
+        return
+
+    # CFG_REPS|15
+    if message.startswith("CFG_REPS|"):
+        try:
+            reps = int(message.split('|')[1])
+            flask_app.oled_selection['reps'] = reps
+            print(f"🎮 OLED: Reps configured - {reps}")
+        except (ValueError, IndexError) as e:
+            print(f"⚠️ Invalid CFG_REPS message: {e}")
+        return
+
+    # CFG_SETS|3
+    if message.startswith("CFG_SETS|"):
+        try:
+            sets = int(message.split('|')[1])
+            flask_app.oled_selection['sets'] = sets
+            print(f"🎮 OLED: Sets configured - {sets}")
+        except (ValueError, IndexError) as e:
+            print(f"⚠️ Invalid CFG_SETS message: {e}")
+        return
+
+    # ==========================================
+    # C. WORKOUT CONTROL
+    # ==========================================
+
+    # WORKOUT_START|1|15|3|12345678
+    if message.startswith("WORKOUT_START|"):
+        try:
+            parts = message.split('|')
+            exercise_id = int(parts[1])
+            reps = int(parts[2])
+            sets = int(parts[3])
+            mcu_timestamp = int(parts[4]) if len(parts) > 4 else 0
+
+            # Map exercise ID
+            exercise_map = {0: "bicep_curl", 1: "shoulder_press", 2: "lateral_raise"}
+            mapped_id = exercise_map.get(exercise_id, "bicep_curl")
+            exercise_data = next((ex for ex in EXERCISES if ex['id'] == mapped_id), None)
+
+            if exercise_data:
+                flask_app.workout_state.update({
+                    'active': True,
+                    'exercise': mapped_id,
+                    'exerciseName': exercise_data['name'],
+                    'icon': exercise_data['icon'],
+                    'caloriesPerRep': exercise_data['calories_per_rep'],
+                    'targetReps': reps,
+                    'totalSets': sets,
+                    'currentSet': 1,
+                    'currentReps': 0,
+                    'totalCalories': 0,
+                    'startTime': datetime.now().isoformat(),
+                    'mcuStartTimestamp': mcu_timestamp,
+                    'status': 'active',
+                    'validReps': 0
+                })
+                print(f"🚀 WORKOUT STARTED:")
+                print(f"   Exercise: {exercise_data['name']}")
+                print(f"   Target: {reps} reps × {sets} sets")
+                print(f"   MCU Time: {mcu_timestamp}ms")
+        except (ValueError, IndexError) as e:
+            print(f"⚠️ Invalid WORKOUT_START message: {e}")
+        return
+
+    # WORKOUT_PAUSE|12389456
+    if message.startswith("WORKOUT_PAUSE|"):
+        try:
+            mcu_timestamp = int(message.split('|')[1])
+            flask_app.update_workout_state(status='paused')
+            print(f"⏸️ Workout paused at {mcu_timestamp}ms")
+        except (ValueError, IndexError) as e:
+            print(f"⚠️ Invalid WORKOUT_PAUSE message: {e}")
+        return
+
+    # WORKOUT_RESUME|12401234
+    if message.startswith("WORKOUT_RESUME|"):
+        try:
+            mcu_timestamp = int(message.split('|')[1])
+            flask_app.update_workout_state(status='active')
+            print(f"▶️ Workout resumed at {mcu_timestamp}ms")
+        except (ValueError, IndexError) as e:
+            print(f"⚠️ Invalid WORKOUT_RESUME message: {e}")
+        return
+
+    # WORKOUT_STOP|12567890
+    if message.startswith("WORKOUT_STOP|"):
+        try:
+            mcu_timestamp = int(message.split('|')[1])
+            flask_app.complete_workout()
+            print(f"🛑 Workout stopped at {mcu_timestamp}ms")
+        except (ValueError, IndexError) as e:
+            print(f"⚠️ Invalid WORKOUT_STOP message: {e}")
+        return
+
+    # WORKOUT_END|12567890
+    if message.startswith("WORKOUT_END|"):
+        try:
+            mcu_timestamp = int(message.split('|')[1])
+            flask_app.complete_workout()
+            print(f"✅ Workout completed at {mcu_timestamp}ms")
+        except (ValueError, IndexError) as e:
+            print(f"⚠️ Invalid WORKOUT_END message: {e}")
+        return
+
+    # ==========================================
+    # D. REAL-TIME REP TRACKING
+    # ==========================================
+
+    # REP_DETECT|5|2|12350000
+    if message.startswith("REP_DETECT|"):
+        try:
+            parts = message.split('|')
+            rep_num = int(parts[1])
+            set_num = int(parts[2])
+            mcu_timestamp = int(parts[3]) if len(parts) > 3 else 0
+
+            # Calculate calories
+            calories = rep_num * flask_app.workout_state.get('caloriesPerRep', 0.5)
+
+            flask_app.update_workout_state(
+                reps=rep_num,
+                current_set=set_num,
+                calories=calories
+            )
+            print(f"🏋️ Rep {rep_num} of Set {set_num} at {mcu_timestamp}ms | Calories: {calories:.1f}")
+        except (ValueError, IndexError) as e:
+            print(f"⚠️ Invalid REP_DETECT message: {e}")
+        return
+
+    # SET_COMPLETE|2|15|12380000
+    if message.startswith("SET_COMPLETE|"):
+        try:
+            parts = message.split('|')
+            set_num = int(parts[1])
+            total_reps = int(parts[2])
+            mcu_timestamp = int(parts[3]) if len(parts) > 3 else 0
+
+            flask_app.update_workout_state(current_set=set_num + 1, reps=0)
+            print(f"📈 Set {set_num} complete: {total_reps} reps at {mcu_timestamp}ms")
+        except (ValueError, IndexError) as e:
+            print(f"⚠️ Invalid SET_COMPLETE message: {e}")
+        return
+
+    # IMU_DATA|Y|1.5|12345678 (optional - for debugging)
+    if message.startswith("IMU_DATA|"):
+        # This is optional - just log it if present
+        try:
+            parts = message.split('|')
+            axis = parts[1]
+            value = float(parts[2])
+            mcu_timestamp = int(parts[3]) if len(parts) > 3 else 0
+            # Just log, don't process
+            # print(f"📊 IMU {axis}: {value}g at {mcu_timestamp}ms")
+        except (ValueError, IndexError):
+            pass
+        return
+
+    # ==========================================
+    # E. SYSTEM STATUS
+    # ==========================================
+
+    # HEARTBEAT|12345678
+    if message.startswith("HEARTBEAT|"):
+        # Just acknowledge heartbeat, no action needed
+        return
+
+    # PING
+    if message == "PING":
+        serial_handler.send_message(f"PONG|{int(datetime.now().timestamp() * 1000)}\n")
+        return
+
+    # ERROR|E001|IMU initialization failed
+    if message.startswith("ERROR|"):
+        try:
+            parts = message.split('|')
+            error_code = parts[1]
+            error_msg = parts[2] if len(parts) > 2 else "Unknown error"
+            print(f"❌ MCU ERROR [{error_code}]: {error_msg}")
+        except (ValueError, IndexError) as e:
+            print(f"⚠️ Invalid ERROR message: {e}")
         return
 
     # ==========================================
