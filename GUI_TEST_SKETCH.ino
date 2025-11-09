@@ -29,9 +29,13 @@
 
 // Test Configuration
 bool autoMode = false;           // Auto-run test scenarios
+bool autoDemoMode = true;        // Auto-demo on startup (for Python integration)
+bool demoCompleted = false;      // Track if demo has run
 bool debugMode = true;           // Print debug messages
 unsigned long lastSerialSend = 0;
+unsigned long startupTime = 0;
 const unsigned long SEND_INTERVAL = 200;  // 200ms between sends
+const unsigned long DEMO_DELAY = 3000;    // 3s delay before auto-demo
 
 // Workout State
 String currentExercise = "";
@@ -74,13 +78,21 @@ void setup() {
     }
 
     sendToFrontend("MCU_READY");
+    startupTime = millis();
 
     Serial.println();
     Serial.println(F("╔════════════════════════════════════════════╗"));
     Serial.println(F("║   SmartDumbbell GUI Test & Debug Sketch   ║"));
     Serial.println(F("╚════════════════════════════════════════════╝"));
     Serial.println();
-    printMenu();
+
+    if (autoDemoMode) {
+        Serial.println(F("🎬 AUTO-DEMO MODE: Will run in 3 seconds..."));
+        Serial.println(F("   (Press any key to cancel and show manual menu)"));
+        Serial.println();
+    } else {
+        printMenu();
+    }
 }
 
 // ================================================
@@ -89,6 +101,15 @@ void setup() {
 void loop() {
     // Check for incoming messages from frontend
     checkSerialMessages();
+
+    // Auto-demo mode (runs once on startup after delay)
+    if (autoDemoMode && !demoCompleted && (millis() - startupTime > DEMO_DELAY)) {
+        runAutoDemo();
+        demoCompleted = true;
+        autoDemoMode = false;
+        Serial.println(F("\n✓ Auto-demo complete!"));
+        Serial.println(F("→ Press 'm' for manual test menu"));
+    }
 
     // Check for test commands from Serial Monitor
     checkTestCommands();
@@ -241,6 +262,18 @@ void handleFrontendMessage(String message) {
 void checkTestCommands() {
     if (Serial.available() > 0) {
         char cmd = Serial.read();
+
+        // Cancel auto-demo if user presses any key during startup
+        if (autoDemoMode && !demoCompleted) {
+            autoDemoMode = false;
+            Serial.println(F("\n⏸️ Auto-demo cancelled by user"));
+            Serial.println();
+            printMenu();
+            while (Serial.available()) {
+                Serial.read();
+            }
+            return;
+        }
 
         // Clear rest of input
         while (Serial.available()) {
@@ -558,6 +591,85 @@ void startSimulatedWorkout() {
     }
 
     workoutActive = false;
+}
+
+// ================================================
+// AUTO-DEMO MODE (Runs automatically on startup)
+// ================================================
+void runAutoDemo() {
+    Serial.println();
+    Serial.println(F("╔════════════════════════════════════════════╗"));
+    Serial.println(F("║         🎬 AUTO-DEMO STARTING...           ║"));
+    Serial.println(F("║   Demonstrating HYBRID OLED + Web Mode    ║"));
+    Serial.println(F("╚════════════════════════════════════════════╝"));
+    Serial.println();
+
+    // Step 1: RFID Login
+    Serial.println(F("▶ Step 1: Simulating RFID card scan..."));
+    simulateRFIDScan(testUsers[0]);  // John
+    delay(1500);
+
+    // Step 2: OLED Exercise Selection
+    Serial.println(F("\n▶ Step 2: User selects exercise on OLED..."));
+    Serial.println(F("   [OLED Display: Bicep Curl]"));
+    oled_exercise = "bicep_curl";
+    sendToFrontend("EXERCISE_SELECTED|bicep_curl");
+    Serial.println(F("   → Frontend will sync in real-time!"));
+    delay(2000);
+
+    // Step 3: OLED Reps Selection
+    Serial.println(F("\n▶ Step 3: User selects reps on OLED..."));
+    oled_reps = 10;
+    repsIndex = 2;  // 10 reps
+    Serial.println(F("   [OLED Display: 10 Reps]"));
+    sendToFrontend("REPS_SELECTED|10");
+    Serial.println(F("   → Frontend updates automatically!"));
+    delay(2000);
+
+    // Step 4: OLED Sets Selection
+    Serial.println(F("\n▶ Step 4: User selects sets on OLED..."));
+    oled_sets = 3;
+    setsIndex = 2;  // 3 sets
+    Serial.println(F("   [OLED Display: 3 Sets]"));
+    sendToFrontend("SETS_SELECTED|3");
+    Serial.println(F("   → Frontend synchronized!"));
+    delay(2000);
+
+    // Step 5: Show OLED State
+    Serial.println();
+    printOLEDState();
+    delay(1500);
+
+    // Step 6: Confirm Workout
+    Serial.println(F("▶ Step 5: User confirms on OLED..."));
+    Serial.println(F("   [OLED: Press CONFIRM button]"));
+    sendToFrontend("WORKOUT_START_CONFIRMED");
+    Serial.println(F("   → Workout starting on both interfaces!"));
+
+    // Set workout state
+    currentExercise = oled_exercise;
+    targetReps = oled_reps;
+    targetSets = oled_sets;
+
+    delay(2000);
+
+    Serial.println();
+    Serial.println(F("╔════════════════════════════════════════════╗"));
+    Serial.println(F("║         ✅ DEMO SEQUENCE COMPLETE          ║"));
+    Serial.println(F("╚════════════════════════════════════════════╝"));
+    Serial.println();
+    Serial.println(F("🎯 HYBRID MODE DEMONSTRATED:"));
+    Serial.println(F("   ✓ User selected everything on OLED"));
+    Serial.println(F("   ✓ Frontend synced in real-time"));
+    Serial.println(F("   ✓ Both interfaces fully synchronized!"));
+    Serial.println();
+    Serial.println(F("💡 TIP: You can now test manually:"));
+    Serial.println(F("   - Press 'o/p/l' to select exercises on OLED"));
+    Serial.println(F("   - Press 'r' to cycle through reps"));
+    Serial.println(F("   - Press 's' to cycle through sets"));
+    Serial.println(F("   - Use Frontend to select - OLED will sync!"));
+    Serial.println(F("   - Press 'm' for full test menu"));
+    Serial.println();
 }
 
 // ================================================
