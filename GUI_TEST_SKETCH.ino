@@ -42,6 +42,15 @@ int currentReps = 0;
 bool workoutActive = false;
 unsigned long workoutStartTime = 0;
 
+// HYBRID: OLED selection state
+String oled_exercise = "";
+int oled_reps = 0;
+int oled_sets = 0;
+int repsIndex = 0; // For cycling through reps
+int setsIndex = 0; // For cycling through sets
+int repsValues[] = {5, 8, 10, 12, 15};
+int setsValues[] = {1, 2, 3, 4, 5, 6};
+
 // Test Users (RFID UIDs)
 String testUsers[] = {
     "7D133721",  // John (default in frontend)
@@ -103,12 +112,20 @@ void printMenu() {
     Serial.println(F("  2 - Scan valid RFID (Sarah)"));
     Serial.println(F("  3 - Scan invalid RFID"));
     Serial.println();
-    Serial.println(F("Workout Tests:"));
+    Serial.println(F("Workout Tests (GUI-initiated):"));
     Serial.println(F("  4 - Quick workout (5 reps, 2 sets, fast)"));
     Serial.println(F("  5 - Medium workout (10 reps, 3 sets)"));
     Serial.println(F("  6 - Long workout (15 reps, 5 sets)"));
     Serial.println(F("  7 - Perfect form workout (100% accuracy)"));
     Serial.println(F("  8 - Poor form workout (60% accuracy)"));
+    Serial.println();
+    Serial.println(F("HYBRID: OLED Menu Simulation:"));
+    Serial.println(F("  o - Select exercise on OLED (bicep curl)"));
+    Serial.println(F("  p - Select exercise on OLED (shoulder press)"));
+    Serial.println(F("  l - Select exercise on OLED (lateral raise)"));
+    Serial.println(F("  r - Select reps on OLED (cycle: 5→8→10→12→15)"));
+    Serial.println(F("  s - Select sets on OLED (cycle: 1→2→3→4→5→6)"));
+    Serial.println(F("  c - Confirm workout start (after selections)"));
     Serial.println();
     Serial.println(F("Position Tests:"));
     Serial.println(F("  9 - Test starting position detection"));
@@ -188,6 +205,33 @@ void handleFrontendMessage(String message) {
     else if (message.equals("WORKOUT_CANCEL")) {
         Serial.println(F("✗ Workout cancelled from GUI"));
         workoutActive = false;
+    }
+
+    // HYBRID: Frontend exercise selection (display on OLED)
+    else if (message.startsWith("WEB_EXERCISE")) {
+        String exercise = parseField(message, 1);
+        Serial.print(F("[Frontend→OLED] Exercise selected: "));
+        Serial.println(exercise);
+        // In real implementation, display this on OLED
+        oled_exercise = exercise;
+    }
+
+    // HYBRID: Frontend reps selection (display on OLED)
+    else if (message.startsWith("WEB_REPS")) {
+        int reps = parseField(message, 1).toInt();
+        Serial.print(F("[Frontend→OLED] Reps selected: "));
+        Serial.println(reps);
+        // In real implementation, display this on OLED
+        oled_reps = reps;
+    }
+
+    // HYBRID: Frontend sets selection (display on OLED)
+    else if (message.startsWith("WEB_SETS")) {
+        int sets = parseField(message, 1).toInt();
+        Serial.print(F("[Frontend→OLED] Sets selected: "));
+        Serial.println(sets);
+        // In real implementation, display this on OLED
+        oled_sets = sets;
     }
 }
 
@@ -276,6 +320,67 @@ void checkTestCommands() {
                 Serial.println(debugMode ? F("ON") : F("OFF"));
                 break;
 
+            // HYBRID: OLED Menu Simulation
+            case 'o':
+            case 'O':
+                Serial.println(F("\n[OLED] Exercise selected: Bicep Curl"));
+                oled_exercise = "bicep_curl";
+                sendToFrontend("EXERCISE_SELECTED|bicep_curl");
+                printOLEDState();
+                break;
+
+            case 'p':
+            case 'P':
+                Serial.println(F("\n[OLED] Exercise selected: Shoulder Press"));
+                oled_exercise = "shoulder_press";
+                sendToFrontend("EXERCISE_SELECTED|shoulder_press");
+                printOLEDState();
+                break;
+
+            case 'l':
+            case 'L':
+                Serial.println(F("\n[OLED] Exercise selected: Lateral Raise"));
+                oled_exercise = "lateral_raise";
+                sendToFrontend("EXERCISE_SELECTED|lateral_raise");
+                printOLEDState();
+                break;
+
+            case 'r':
+            case 'R':
+                repsIndex = (repsIndex + 1) % 5;
+                oled_reps = repsValues[repsIndex];
+                Serial.print(F("\n[OLED] Reps selected: "));
+                Serial.println(oled_reps);
+                sendToFrontend("REPS_SELECTED|" + String(oled_reps));
+                printOLEDState();
+                break;
+
+            case 's':
+            case 'S':
+                setsIndex = (setsIndex + 1) % 6;
+                oled_sets = setsValues[setsIndex];
+                Serial.print(F("\n[OLED] Sets selected: "));
+                Serial.println(oled_sets);
+                sendToFrontend("SETS_SELECTED|" + String(oled_sets));
+                printOLEDState();
+                break;
+
+            case 'c':
+            case 'C':
+                Serial.println(F("\n[OLED] Confirming workout start..."));
+                if (oled_exercise.length() > 0 || oled_reps > 0 || oled_sets > 0) {
+                    sendToFrontend("WORKOUT_START_CONFIRMED");
+                    Serial.println(F("✓ Workout confirmed!"));
+                    Serial.println(F("→ Check frontend - should start automatically!"));
+                    // Set workout state for simulation
+                    if (oled_exercise.length() > 0) currentExercise = oled_exercise;
+                    if (oled_reps > 0) targetReps = oled_reps;
+                    if (oled_sets > 0) targetSets = oled_sets;
+                } else {
+                    Serial.println(F("✗ No selections made yet! Select exercise/reps/sets first."));
+                }
+                break;
+
             default:
                 if (cmd != '\n' && cmd != '\r') {
                     Serial.println(F("Unknown command. Press 'm' for menu."));
@@ -283,6 +388,24 @@ void checkTestCommands() {
                 break;
         }
     }
+}
+
+// ================================================
+// PRINT OLED STATE
+// ================================================
+void printOLEDState() {
+    Serial.println(F("\n───── OLED Display State ─────"));
+    Serial.print(F("Exercise: "));
+    Serial.println(oled_exercise.length() > 0 ? oled_exercise : F("(not selected)"));
+    Serial.print(F("Reps: "));
+    Serial.println(oled_reps > 0 ? String(oled_reps) : F("(not selected)"));
+    Serial.print(F("Sets: "));
+    Serial.println(oled_sets > 0 ? String(oled_sets) : F("(not selected)"));
+
+    if (oled_exercise.length() > 0 && oled_reps > 0 && oled_sets > 0) {
+        Serial.println(F("→ All selections complete! Press 'c' to confirm."));
+    }
+    Serial.println(F("──────────────────────────────\n"));
 }
 
 // ================================================

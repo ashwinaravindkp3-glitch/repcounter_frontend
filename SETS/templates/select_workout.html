@@ -504,7 +504,9 @@
             window.location.href = '/dashboard';
         }
 
-        function selectReps(reps) {
+        let syncingFromOLED = false; // Prevent loop when syncing from OLED
+
+        function selectReps(reps, fromOLED = false) {
             selectedReps = reps;
             // Update UI
             document.querySelectorAll('.selection-section')[0].querySelectorAll('.number-btn').forEach(btn => {
@@ -515,9 +517,14 @@
             });
             document.getElementById('customReps').value = reps;
             updateSummary();
+
+            // HYBRID: Send to MCU/OLED (only if user selected on frontend)
+            if (!fromOLED) {
+                sendToMCU('reps', reps);
+            }
         }
 
-        function selectSets(sets) {
+        function selectSets(sets, fromOLED = false) {
             selectedSets = sets;
             // Update UI
             document.querySelectorAll('.selection-section')[1].querySelectorAll('.number-btn').forEach(btn => {
@@ -527,6 +534,24 @@
                 }
             });
             updateSummary();
+
+            // HYBRID: Send to MCU/OLED (only if user selected on frontend)
+            if (!fromOLED) {
+                sendToMCU('sets', sets);
+            }
+        }
+
+        // HYBRID: Send frontend selection to MCU/OLED
+        async function sendToMCU(type, value) {
+            try {
+                await fetch('/api/send_frontend_selection', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type, value })
+                });
+            } catch (error) {
+                console.log('MCU sync error (non-critical):', error);
+            }
         }
 
         function updateSummary() {
@@ -571,8 +596,33 @@
             }
         }
 
+        // HYBRID: Poll for OLED selections (real-time sync)
+        async function pollOLEDSelections() {
+            try {
+                const response = await fetch('/api/oled_selection');
+                const data = await response.json();
+
+                // Update reps if selected on OLED
+                if (data.reps && data.reps !== selectedReps) {
+                    console.log(`🎮 OLED selected ${data.reps} reps - syncing frontend`);
+                    selectReps(data.reps, true); // Pass true to indicate from OLED
+                }
+
+                // Update sets if selected on OLED
+                if (data.sets && data.sets !== selectedSets) {
+                    console.log(`🎮 OLED selected ${data.sets} sets - syncing frontend`);
+                    selectSets(data.sets, true); // Pass true to indicate from OLED
+                }
+            } catch (error) {
+                console.log('OLED poll error (non-critical):', error);
+            }
+        }
+
         // Initialize
         createParticles();
+
+        // Start polling for OLED selections every 500ms
+        setInterval(pollOLEDSelections, 500);
     </script>
 </body>
 </html>

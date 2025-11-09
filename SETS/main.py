@@ -81,6 +81,102 @@ def handle_serial_message(message: str):
         return
 
     # ==========================================
+    # HYBRID: Exercise Selection from OLED
+    # ==========================================
+    # Format from MCU: EXERCISE_SELECTED|exercise_id
+    # Example: EXERCISE_SELECTED|bicep_curl
+    # User chose exercise on OLED, frontend will sync and show it
+    if message.startswith("EXERCISE_SELECTED|"):
+        try:
+            exercise_id = message.split('|')[1].strip()
+            exercise_data = next((ex for ex in EXERCISES if ex['id'] == exercise_id), None)
+            if exercise_data:
+                flask_app.oled_selection.update({
+                    'exercise': exercise_id,
+                    'exerciseName': exercise_data['name'],
+                    'icon': exercise_data['icon'],
+                    'caloriesPerRep': exercise_data['calories_per_rep']
+                })
+                print(f"🎮 OLED: User selected {exercise_data['name']}")
+                print(f"   Frontend will update in real-time!")
+            else:
+                print(f"⚠️ Unknown exercise ID: {exercise_id}")
+        except (ValueError, IndexError) as e:
+            print(f"⚠️ Invalid EXERCISE_SELECTED message: {e}")
+        return
+
+    # ==========================================
+    # HYBRID: Reps Selection from OLED
+    # ==========================================
+    # Format from MCU: REPS_SELECTED|10
+    # User chose reps on OLED, frontend will sync
+    if message.startswith("REPS_SELECTED|"):
+        try:
+            reps = int(message.split('|')[1])
+            flask_app.oled_selection['reps'] = reps
+            print(f"🎮 OLED: User selected {reps} reps")
+        except (ValueError, IndexError) as e:
+            print(f"⚠️ Invalid REPS_SELECTED message: {e}")
+        return
+
+    # ==========================================
+    # HYBRID: Sets Selection from OLED
+    # ==========================================
+    # Format from MCU: SETS_SELECTED|3
+    # User chose sets on OLED, frontend will sync
+    if message.startswith("SETS_SELECTED|"):
+        try:
+            sets = int(message.split('|')[1])
+            flask_app.oled_selection['sets'] = sets
+            print(f"🎮 OLED: User selected {sets} sets")
+        except (ValueError, IndexError) as e:
+            print(f"⚠️ Invalid SETS_SELECTED message: {e}")
+        return
+
+    # ==========================================
+    # HYBRID: Workout Start Confirmation
+    # ==========================================
+    # Format from MCU: WORKOUT_START_CONFIRMED
+    # This happens when ALL selections are complete (from either OLED or Frontend)
+    # and user confirms "START" on OLED or Frontend
+    if message.startswith("WORKOUT_START_CONFIRMED"):
+        # Check if we have all required data (from OLED selections or Frontend)
+        oled = flask_app.oled_selection
+
+        # Use OLED selections if available, otherwise use what's already in workout_state
+        exercise_id = oled.get('exercise') or flask_app.workout_state.get('exercise')
+        reps = oled.get('reps') or flask_app.workout_state.get('targetReps')
+        sets = oled.get('sets') or flask_app.workout_state.get('totalSets')
+
+        if exercise_id and reps and sets:
+            exercise_data = next((ex for ex in EXERCISES if ex['id'] == exercise_id), None)
+            if exercise_data:
+                flask_app.workout_state.update({
+                    'active': True,
+                    'exercise': exercise_id,
+                    'exerciseName': exercise_data['name'],
+                    'icon': exercise_data['icon'],
+                    'caloriesPerRep': exercise_data['calories_per_rep'],
+                    'targetReps': reps,
+                    'totalSets': sets,
+                    'currentSet': 1,
+                    'currentReps': 0,
+                    'totalCalories': 0,
+                    'startTime': datetime.now().isoformat(),
+                    'status': 'waiting',
+                    'validReps': 0
+                })
+                print(f"🚀 WORKOUT STARTED:")
+                print(f"   Exercise: {exercise_data['name']}")
+                print(f"   Target: {reps} reps × {sets} sets")
+                print(f"   Both OLED & Frontend synchronized!")
+            else:
+                print(f"⚠️ Unknown exercise: {exercise_id}")
+        else:
+            print(f"⚠️ Missing workout parameters (exercise/reps/sets)")
+        return
+
+    # ==========================================
     # Workout Status Updates
     # ==========================================
     # Format from MCU: STATUS|waiting (or ready, or active)
