@@ -208,15 +208,22 @@
                 <tbody>
                     {% for workout in history %}
                     <tr>
-                        <td class="date-cell">{{ workout.date }}</td>
-                        <td class="exercise-cell">{{ workout.exercise | upper }}</td>
-                        <td class="stat-cell">{{ workout.sets }}</td>
-                        <td class="stat-cell">{{ workout.reps }}</td>
-                        <td class="stat-cell">{{ workout.duration }}s</td>
-                        <td class="stat-cell">{{ workout.calories }}</td>
+                        <td class="date-cell">{{ workout.get('date', 'N/A') }}</td>
+                        <td class="exercise-cell">{{ workout.get('exercise', 'Unknown') | upper }}</td>
+                        <td class="stat-cell">{{ workout.get('sets', '0') }}</td>
+                        <td class="stat-cell">{{ workout.get('reps', '0') }}</td>
+                        <td class="stat-cell">{{ workout.get('duration', '0') }}s</td>
+                        <td class="stat-cell">{{ workout.get('calories', '0') }}</td>
                         <td class="stat-cell">
-                            {% set accuracy = (workout.valid_reps / (workout.reps * workout.sets) * 100) if (workout.reps * workout.sets) > 0 else 100 %}
-                            {{ "%.1f"|format(accuracy) }}%
+                            {% set reps = workout.get('reps', '0') | int %}
+                            {% set sets = workout.get('sets', '0') | int %}
+                            {% set valid_reps = workout.get('valid_reps', reps * sets) | int %}
+                            {% set total = reps * sets %}
+                            {% if total > 0 %}
+                                {{ "%.1f"|format((valid_reps / total * 100)) }}%
+                            {% else %}
+                                100.0%
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
