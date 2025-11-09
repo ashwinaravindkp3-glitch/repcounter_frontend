@@ -75,7 +75,12 @@ def dashboard():
     if not user:
         return redirect(url_for('index'))
 
-    stats = database.get_total_stats(user)
+    try:
+        stats = database.get_total_stats(user)
+    except Exception as e:
+        print(f"Error getting stats: {e}")
+        stats = {"total_workouts": 0, "total_reps": 0, "avg_accuracy": 0}
+
     return render_template('dashboard.html',
                           username=user,
                           stats=stats,
@@ -104,12 +109,17 @@ def history():
     if not user:
         return redirect(url_for('index'))
 
-    history = database.get_workout_history(user)
-    # Reverse to show newest first
-    history.reverse()
+    try:
+        history_data = database.get_workout_history(user)
+        # Reverse to show newest first
+        history_data.reverse()
+    except Exception as e:
+        print(f"Error getting history: {e}")
+        history_data = []
+
     return render_template('history.html',
                           username=user,
-                          history=history)
+                          history=history_data)
 
 @app.route('/api/serial_status')
 def serial_status():
