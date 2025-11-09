@@ -1,5 +1,5 @@
 # main.py
-from config import SERIAL_PORT, BAUD_RATE, TIMEOUT, RFID_USERS, PORT, EXERCISES
+from config import SERIAL_PORT, BAUD_RATE, TIMEOUT, RFID_USERS, PORT, EXERCISES, DISPLAY_URL
 from serial_handler import SerialHandler
 from rfid_auth import RFIDAuth
 from database import UserDatabase
@@ -8,6 +8,39 @@ import pathlib
 import threading
 import time
 import app as flask_app
+
+# Browser auto-launch
+try:
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+    from selenium.webdriver.chrome.service import Service
+    SELENIUM_AVAILABLE = True
+except ImportError:
+    SELENIUM_AVAILABLE = False
+
+def launch_browser():
+    """Auto-launch Chrome browser with Selenium"""
+    if not SELENIUM_AVAILABLE:
+        print("ℹ️ Selenium not available. Please open browser manually.")
+        return None
+
+    try:
+        print("🌐 Launching Chrome browser...")
+        chrome_options = Options()
+        chrome_options.add_argument('--start-maximized')
+        chrome_options.add_argument('--disable-blink-features=AutomationControlled')
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        chrome_options.add_experimental_option('useAutomationExtension', False)
+
+        # Try to create driver
+        driver = webdriver.Chrome(options=chrome_options)
+        driver.get(f'http://{DISPLAY_URL}:{PORT}')
+        print(f"✓ Browser opened: http://{DISPLAY_URL}:{PORT}")
+        return driver
+    except Exception as e:
+        print(f"⚠️ Could not auto-launch browser: {e}")
+        print(f"📊 Please open manually: http://{DISPLAY_URL}:{PORT}")
+        return None
 
 def main():
     # Initialize components
@@ -25,25 +58,30 @@ def main():
     print("🚀 Starting Flask server...")
     flask_thread = threading.Thread(target=flask_app.run_flask, daemon=True)
     flask_thread.start()
-    time.sleep(1)
+    time.sleep(2)  # Give Flask time to start
+
+    # Auto-launch browser
+    browser = launch_browser()
 
     # Start serial communication
     print(f"📡 Connecting to {SERIAL_PORT}...")
     if not serial_handler.start():
         print("✗ Failed to start serial. Running in web-only mode...")
-        print(f"📊 Open browser: http://127.0.0.1:{PORT}")
+        print(f"📊 URL: http://{DISPLAY_URL}:{PORT}")
         # Keep running for web interface
         try:
             while True:
                 time.sleep(1)
         except KeyboardInterrupt:
             print("\n👋 Shutting down...")
+            if browser:
+                browser.quit()
         return
 
     print(f"✓ Serial connected: {SERIAL_PORT} @ {BAUD_RATE}")
-    print(f"📊 Open browser: http://127.0.0.1:{PORT}")
+    print(f"📊 URL: http://{DISPLAY_URL}:{PORT}")
     print("\n" + "="*50)
-    print("SmartDumbbell System Running!")
+    print("🏋️ SETS - SmartDumbbell System Running!")
     print("="*50 + "\n")
 
     # Main serial processing loop
@@ -58,6 +96,8 @@ def main():
             time.sleep(0.1)
     except KeyboardInterrupt:
         print("\n👋 Shutting down...")
+        if browser:
+            browser.quit()
     finally:
         serial_handler.stop()
 
