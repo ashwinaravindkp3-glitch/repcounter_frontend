@@ -113,10 +113,17 @@ def history():
 
 @app.route('/api/serial_status')
 def serial_status():
-    return jsonify({
-        "connected": serial_handler.is_running if serial_handler else False,
-        "current_user": rfid_auth.get_current_user() if rfid_auth else None
-    })
+    try:
+        return jsonify({
+            "connected": serial_handler.is_running if serial_handler else False,
+            "current_user": rfid_auth.get_current_user() if rfid_auth else None
+        })
+    except Exception as e:
+        print(f"Error in serial_status: {e}")
+        return jsonify({
+            "connected": False,
+            "current_user": None
+        })
 
 @app.route('/api/start_workout', methods=['POST'])
 def start_workout():

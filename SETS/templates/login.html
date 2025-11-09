@@ -4,450 +4,174 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SETS - System Access</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/futuristic.css') }}?v={{ v }}">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: var(--bg-darker);
+            font-family: 'Rajdhani', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            overflow: hidden;
+            color: #e0e6ff;
         }
 
         .login-container {
-            position: relative;
-            z-index: 10;
-            width: 100%;
-            max-width: 600px;
-            padding: 2rem;
-        }
-
-        .login-card {
-            background: linear-gradient(135deg, rgba(26, 31, 58, 0.95), rgba(10, 14, 39, 0.95));
-            border: 2px solid rgba(0, 240, 255, 0.5);
-            border-radius: 20px;
+            max-width: 900px;
+            width: 90%;
+            background: rgba(26, 31, 58, 0.6);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 12px;
             padding: 3rem;
-            text-align: center;
-            box-shadow:
-                0 0 60px rgba(0, 240, 255, 0.3),
-                inset 0 0 40px rgba(0, 240, 255, 0.05);
-            animation: slideUp 0.8s ease-out, borderGlow 3s infinite;
-            position: relative;
-            overflow: hidden;
+            backdrop-filter: blur(10px);
         }
 
-        .login-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(
-                transparent,
-                rgba(0, 240, 255, 0.1),
-                transparent 30%
-            );
-            animation: rotate 4s linear infinite;
-        }
-
-        .login-content {
-            position: relative;
-            z-index: 1;
-        }
-
-        @keyframes rotate {
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes borderGlow {
-            0%, 100% {
-                box-shadow:
-                    0 0 60px rgba(0, 240, 255, 0.3),
-                    inset 0 0 40px rgba(0, 240, 255, 0.05);
-            }
-            50% {
-                box-shadow:
-                    0 0 80px rgba(0, 240, 255, 0.5),
-                    inset 0 0 60px rgba(0, 240, 255, 0.1);
-            }
-        }
-
-        .system-logo {
-            font-size: 6rem;
-            margin-bottom: 1rem;
-            filter: drop-shadow(0 0 20px var(--neon-cyan));
-            animation: logoFloat 3s ease-in-out infinite;
-        }
-
-        @keyframes logoFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .app-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 4rem;
-            font-weight: 900;
-            color: var(--neon-cyan);
-            text-shadow: var(--glow-cyan);
-            letter-spacing: 8px;
-            margin-bottom: 0.5rem;
-            animation: titleFlicker 5s infinite;
-        }
-
-        @keyframes titleFlicker {
-            0%, 100% {
-                text-shadow: var(--glow-cyan);
-                opacity: 1;
-            }
-            50% {
-                text-shadow:
-                    0 0 20px var(--neon-cyan),
-                    0 0 40px var(--neon-cyan),
-                    0 0 60px var(--neon-cyan),
-                    0 0 80px var(--neon-cyan);
-            }
-            98%, 99% {
-                opacity: 0.8;
-            }
-        }
-
-        .app-subtitle {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.2rem;
-            color: var(--neon-magenta);
-            text-shadow: 0 0 10px var(--neon-magenta);
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            margin-bottom: 3rem;
-        }
-
-        .time-display {
-            font-family: 'Orbitron', monospace;
-            font-size: 5rem;
-            font-weight: bold;
-            color: var(--neon-cyan);
-            text-shadow: var(--glow-cyan);
-            margin: 2rem 0;
-            letter-spacing: 4px;
-            animation: timeGlow 2s infinite;
-        }
-
-        @keyframes timeGlow {
-            0%, 100% {
-                text-shadow: var(--glow-cyan);
-            }
-            50% {
-                text-shadow:
-                    0 0 20px var(--neon-cyan),
-                    0 0 40px var(--neon-cyan),
-                    0 0 60px var(--neon-cyan);
-            }
-        }
-
-        .scan-zone {
-            margin: 3rem 0;
-            position: relative;
-        }
-
-        .scan-animation {
-            width: 150px;
-            height: 150px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        .scan-ring {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 3px solid var(--neon-cyan);
-            border-radius: 50%;
-            animation: scanPulse 2s infinite;
-            box-shadow: var(--glow-cyan);
-        }
-
-        .scan-ring:nth-child(2) {
-            animation-delay: 0.5s;
-            border-color: var(--neon-magenta);
-            box-shadow: var(--glow-magenta);
-        }
-
-        .scan-ring:nth-child(3) {
-            animation-delay: 1s;
-        }
-
-        @keyframes scanPulse {
-            0% {
-                transform: scale(0.8);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(1.8);
-                opacity: 0;
-            }
-        }
-
-        .scan-icon {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 4rem;
-            filter: drop-shadow(0 0 10px var(--neon-cyan));
-            animation: iconRotate 3s linear infinite;
-        }
-
-        @keyframes iconRotate {
-            from { transform: translate(-50%, -50%) rotate(0deg); }
-            to { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
-        .rfid-prompt {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.4rem;
-            color: var(--text-light);
-            margin: 2rem 0;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .rfid-prompt strong {
-            color: var(--neon-cyan);
-            text-shadow: 0 0 10px var(--neon-cyan);
-        }
-
-        .status-text {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 1.1rem;
-            color: var(--neon-green);
-            text-shadow: 0 0 10px var(--neon-green);
-            margin-top: 2rem;
-            animation: statusBlink 2s infinite;
-        }
-
-        @keyframes statusBlink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-
-        .connection-status {
-            position: fixed;
-            top: 2rem;
-            right: 2rem;
-            background: rgba(26, 31, 58, 0.9);
-            border: 1px solid var(--neon-cyan);
-            border-radius: 10px;
-            padding: 0.75rem 1.5rem;
+        .header {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
-            z-index: 100;
+            justify-content: space-between;
+            margin-bottom: 3rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+        }
+
+        .brand h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #00f0ff;
+            letter-spacing: 2px;
+        }
+
+        .brand p {
+            font-size: 0.9rem;
+            color: #8b96b8;
+            font-weight: 300;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
         }
 
         .status-dot {
-            width: 12px;
-            height: 12px;
+            width: 8px;
+            height: 8px;
+            background: #00ff41;
             border-radius: 50%;
-            background: var(--neon-green);
-            box-shadow: 0 0 10px var(--neon-green);
-            animation: dotPulse 2s infinite;
+            animation: pulse 2s infinite;
         }
 
         .status-dot.disconnected {
-            background: var(--danger);
-            box-shadow: 0 0 10px var(--danger);
+            background: #ff0055;
         }
 
-        @keyframes dotPulse {
+        @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
 
-        .connection-text {
-            font-family: 'Rajdhani', sans-serif;
-            color: var(--neon-cyan);
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .main-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 3rem;
         }
 
-        /* Hexagon decorations */
-        .hex-decoration {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            background: rgba(0, 240, 255, 0.1);
-            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            animation: hexFloat 4s ease-in-out infinite;
+        .left-section {
+            flex: 1;
         }
 
-        .hex-decoration:nth-child(1) {
-            top: 10%;
-            left: 10%;
-            animation-delay: 0s;
+        .scan-icon {
+            font-size: 8rem;
+            opacity: 0.6;
+            animation: scanPulse 2s ease-in-out infinite;
         }
 
-        .hex-decoration:nth-child(2) {
-            top: 80%;
-            right: 15%;
-            animation-delay: 1s;
+        @keyframes scanPulse {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.05); opacity: 0.8; }
         }
 
-        .hex-decoration:nth-child(3) {
-            bottom: 20%;
-            left: 20%;
-            animation-delay: 2s;
+        .right-section {
+            flex: 1;
         }
 
-        @keyframes hexFloat {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
+        .prompt {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #00f0ff;
+        }
+
+        .status-text {
+            font-size: 1rem;
+            color: #8b96b8;
+            margin-bottom: 2rem;
+        }
+
+        .time-display {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: #00f0ff;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 3px;
         }
     </style>
 </head>
 <body>
-    <!-- ⚠️ DIAGNOSTIC BANNER - PROVES NEW CODE IS LOADING ⚠️ -->
-    <div id="newCodeBanner" style="position: fixed; top: 0; left: 0; right: 0; background: #FF0000; color: #FFFF00; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; z-index: 999999; font-family: Arial, sans-serif; border-bottom: 5px solid #FFFF00;">
-        🚨 NEW CODE LOADED - IF YOU SEE THIS, CACHE IS CLEARED! 🚨
-    </div>
-
-    <!-- Cyberpunk Grid Background -->
-    <div class="cyber-grid"></div>
-    <div class="scan-lines"></div>
-
-    <!-- Animated Particles -->
-    <div class="particles" id="particles"></div>
-
-    <!-- Custom Cursor -->
-    <div class="custom-cursor" id="customCursor"></div>
-
-    <!-- Hexagon Decorations -->
-    <div class="hex-decoration"></div>
-    <div class="hex-decoration"></div>
-    <div class="hex-decoration"></div>
-
-    <!-- Connection Status -->
-    <div class="connection-status">
-        <div class="status-dot" id="statusDot"></div>
-        <span class="connection-text" id="connectionText">Connecting...</span>
-    </div>
-
-    <!-- Login Container -->
     <div class="login-container">
-        <div class="login-card">
-            <div class="login-content">
-                <div class="system-logo">🏋️</div>
-                <h1 class="app-title">SETS</h1>
-                <p class="app-subtitle">Smart Exercise Tracking System</p>
-                <div style="background: #ff00ff; color: #000; padding: 10px; margin: 10px 0; font-weight: bold; border-radius: 5px; text-align: center;">
-                    🔥 VERSION: {{ v }} - UPDATED CODE LOADED 🔥
+        <div class="header">
+            <div class="logo-section">
+                <div class="logo">🏋️</div>
+                <div class="brand">
+                    <h1>SETS</h1>
+                    <p>Smart Exercise Tracking System</p>
                 </div>
+            </div>
+            <div class="status">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="connectionText">Connecting...</span>
+            </div>
+        </div>
 
-                <div class="time-display" id="currentTime">00:00 AM</div>
-
-                <div class="scan-zone">
-                    <div class="scan-animation">
-                        <div class="scan-ring"></div>
-                        <div class="scan-ring"></div>
-                        <div class="scan-ring"></div>
-                        <div class="scan-icon">📡</div>
-                    </div>
-                </div>
-
-                <p class="rfid-prompt">
-                    <strong>▶ SCAN RFID CARD TO ACCESS SYSTEM</strong>
-                </p>
-
-                <p class="status-text" id="statusText">[ AWAITING AUTHENTICATION ]</p>
+        <div class="main-content">
+            <div class="left-section">
+                <div class="scan-icon">📡</div>
+            </div>
+            <div class="right-section">
+                <div class="prompt">Scan RFID Card</div>
+                <div class="status-text" id="statusText">Awaiting Authentication</div>
+                <div class="time-display" id="currentTime">00:00:00</div>
             </div>
         </div>
     </div>
 
     <script>
-        // Custom Cursor
-        const cursor = document.getElementById('customCursor');
-        let mouseX = 0, mouseY = 0;
-        let cursorX = 0, cursorY = 0;
-
-        document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-        });
-
-        function animateCursor() {
-            cursorX += (mouseX - cursorX) * 0.2;
-            cursorY += (mouseY - cursorY) * 0.2;
-            cursor.style.left = cursorX + 'px';
-            cursor.style.top = cursorY + 'px';
-            requestAnimationFrame(animateCursor);
-        }
-        animateCursor();
-
-        // Cursor hover effect
-        document.querySelectorAll('a, button, .cyber-btn').forEach(elem => {
-            elem.addEventListener('mouseenter', () => cursor.classList.add('hover'));
-            elem.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
-        });
-
-        // Create cyberpunk particles
-        function createParticles() {
-            const particlesContainer = document.getElementById('particles');
-            particlesContainer.style.position = 'fixed';
-            particlesContainer.style.top = '0';
-            particlesContainer.style.left = '0';
-            particlesContainer.style.width = '100%';
-            particlesContainer.style.height = '100%';
-            particlesContainer.style.pointerEvents = 'none';
-            particlesContainer.style.zIndex = '1';
-
-            for (let i = 0; i < 30; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                const size = Math.random() * 4 + 2;
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.bottom = '-10px';
-                particle.style.animationDelay = Math.random() * 20 + 's';
-                particle.style.animationDuration = (Math.random() * 15 + 15) + 's';
-                particlesContainer.appendChild(particle);
-            }
-        }
-
-        // Update time display - FIXED with forced refresh
+        // Update time display
         function updateTime() {
             const now = new Date();
-            const hours = now.getHours();
+            const hours = now.getHours().toString().padStart(2, '0');
             const minutes = now.getMinutes().toString().padStart(2, '0');
             const seconds = now.getSeconds().toString().padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            const displayHours = hours % 12 || 12;
-
-            const timeElement = document.getElementById('currentTime');
-            if (timeElement) {
-                // Force update with new value
-                const newTime = `${displayHours.toString().padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
-                timeElement.textContent = newTime;
-            }
+            document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
         }
 
         // Check connection status
@@ -462,53 +186,31 @@
 
                 if (data.connected) {
                     statusDot.classList.remove('disconnected');
-                    connectionText.textContent = 'SYSTEM ONLINE';
-                    statusText.textContent = '[ AWAITING AUTHENTICATION ]';
+                    connectionText.textContent = 'System Online';
+                    statusText.textContent = 'Awaiting Authentication';
                 } else {
                     statusDot.classList.add('disconnected');
-                    connectionText.textContent = 'MCU OFFLINE';
-                    statusText.textContent = '[ CONNECTION ERROR ]';
+                    connectionText.textContent = 'MCU Offline';
+                    statusText.textContent = 'Connection Error';
                 }
 
                 // If user is logged in, redirect to dashboard
                 if (data.current_user) {
-                    statusText.textContent = '[ ACCESS GRANTED ]';
+                    statusText.textContent = 'Access Granted';
                     setTimeout(() => {
                         window.location.href = '/dashboard';
                     }, 500);
                 }
             } catch (error) {
                 console.error('Status check failed:', error);
-                const statusDot = document.getElementById('statusDot');
-                const connectionText = document.getElementById('connectionText');
-                statusDot.classList.add('disconnected');
-                connectionText.textContent = 'ERROR';
             }
         }
 
-        // Initialize everything
-        createParticles();
+        // Initialize
         updateTime();
-
-        // Update time every second with immediate execution
         setInterval(updateTime, 1000);
-
-        // Check status every second
         setInterval(checkStatus, 1000);
-
-        // Initial status check
         checkStatus();
-
-        // Force time update on visibility change
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) {
-                updateTime();
-            }
-        });
-
-        // Update time when page becomes visible/focused
-        window.addEventListener('focus', updateTime);
-        window.addEventListener('pageshow', updateTime);
     </script>
 </body>
 </html>
