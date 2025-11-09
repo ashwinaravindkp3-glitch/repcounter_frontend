@@ -35,3 +35,7 @@ RFID_USERS = {
 HOST = '0.0.0.0'  # Listen on all interfaces
 PORT = 5000
 DISPLAY_URL = 'localhost'  # User-friendly display name
+
+# Cache busting
+import time
+CACHE_VERSION = int(time.time())  # Unix timestamp for cache busting
