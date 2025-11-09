@@ -45,7 +45,22 @@ Edit `config.py` and set your COM port:
 ```python
 SERIAL_PORT = 'COM5'  # Windows: COM5, Linux: /dev/ttyUSB0
 BAUD_RATE = 115200
+
+# MCU Timing (adjust if needed)
+MCU_INIT_DELAY = 3.0    # 3 seconds after connection
+MCU_MSG_DELAY = 0.2     # 200ms between messages
+MCU_SEND_DELAY = 0.15   # 150ms after each send
 ```
+
+**⚡ IMPORTANT: MCU Timing**
+
+The system includes **generous delays** for MCU compatibility:
+- ✅ **3 second** wait after connection (MCU reset)
+- ✅ **200ms** minimum gap between messages
+- ✅ **150ms** delay after sending each message
+- ✅ Auto `flush()` on every transmission
+
+**See [UART_TIMING_GUIDE.md](UART_TIMING_GUIDE.md) for detailed timing information and troubleshooting.**
 
 ### 3. Add RFID Users
 
@@ -290,6 +305,36 @@ EXERCISES = [
 - Verify RFID UID in `config.py`
 - Check serial monitor for `UID_REQ` messages
 - Ensure proper message format with `|` separator
+
+---
+
+## MCU Development
+
+### Example Arduino Code
+
+See **[MCU_EXAMPLE_CODE.ino](MCU_EXAMPLE_CODE.ino)** for complete Arduino/ESP32 example showing:
+- ✅ Proper UART timing with delays
+- ✅ Message parsing with buffer overflow protection
+- ✅ Workout flow implementation
+- ✅ `Serial.flush()` usage
+- ✅ Minimum 200ms between sends
+
+### Key MCU Requirements
+
+```cpp
+// In your Arduino code:
+void sendToFrontend(String message) {
+    Serial.println(message);
+    Serial.flush();  // CRITICAL!
+    delay(50);       // Give time to transmit
+}
+```
+
+**Always:**
+1. Add delays between sends (200ms minimum)
+2. Use `Serial.flush()` after every write
+3. Check for buffer overflow
+4. Parse complete messages (wait for `\n`)
 
 ---
 

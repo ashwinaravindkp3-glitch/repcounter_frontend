@@ -47,12 +47,15 @@ def main():
     print("="*50 + "\n")
 
     # Main serial processing loop
+    # Slower polling to give MCU time to process
     try:
         while True:
             message = serial_handler.get_message()
             if message:
                 handle_serial_message(message)
-            time.sleep(0.05)  # Poll faster for better responsiveness
+
+            # Poll every 100ms (MCU-friendly, prevents buffer overflow)
+            time.sleep(0.1)
     except KeyboardInterrupt:
         print("\n👋 Shutting down...")
     finally:
